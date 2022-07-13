@@ -28,6 +28,6 @@ end
 
 mat = xyz_rgb_mat(param);
 rgb_lin = xyz * mat;
-rgb_lin = clamp_rgb(rgb_lin, param, p.Results.method);
+rgb_lin = internal.clamp_rgb(rgb_lin, param, p.Results.method, 'Linear', true);
 rgb = rgb_gamma(rgb_lin, param);
 end

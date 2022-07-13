@@ -26,7 +26,7 @@ if strcmpi(space, 'sRGB')
     name = 'D65';
     g = 2.4;
     a = 0.055;
-elseif strcmpi(space, 'AdobeRGB')
+elseif strcmpi(space, 'AdobeRGB') || strcmpi(space, 'ARGB')
     pri_xy = [0.6400, 0.3300;
         0.2100, 0.7100;
         0.1500, 0.0600];

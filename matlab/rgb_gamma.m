@@ -26,9 +26,9 @@ end
 g = 1 / param.gamma;
 x0 = ((1 + param.alpha) * (1 - g) / param.alpha)^(-1 / g);
 k = (1 + param.alpha) * x0^(g - 1);
-idx = rgb_lin < x0;
+idx = abs(rgb_lin) < x0;
 
 rgb = rgb_lin;
 rgb(idx) = rgb(idx) * k;
-rgb(~idx) = rgb(~idx).^g * (1 + param.alpha) - param.alpha;
+rgb(~idx) = sign(rgb(~idx)) .* abs(rgb(~idx)).^g * (1 + param.alpha) - param.alpha;
 end
