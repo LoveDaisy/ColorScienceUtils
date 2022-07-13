@@ -1,4 +1,4 @@
-function res = colorspace_validator(space)
+function res = cs_name_validator(space)
 % INPUT
 %   space:          Expected to be a valid colorspace name, such as 'sRGB' or 'AdobeRGB'.
 % OUTPUT

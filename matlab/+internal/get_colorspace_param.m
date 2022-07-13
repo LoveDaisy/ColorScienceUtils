@@ -3,17 +3,17 @@ function pram = get_colorspace_param(space)
 %   Get colorspace prameters, including xy-coordinate of R, G, B, and white point,
 %   and gamma, etc.
 % INPUT
-%   space:      The colorspace name. See internal.colorspace_validator for detail.
+%   space:      The colorspace name. See internal.cs_name_validator for detail.
 % OUTPUT
 %   pri:        A struct containing fields as following:
 %               .w:         1*3 vector, white point, XYZ coordinate.
-%               .rgb:       3*2 matrix, each row represents a color, xy coordinate.
 %               .w_name:    char vector, the white point name, such as 'D65', etc.
+%               .rgb:       3*2 matrix, each row represents a color, xy coordinate.
 %               .alpha      a scalar, used in gamma transfer function
 %               .gamma      a scalar, used in gamma transfer function
 
 p = inputParser;
-p.addRequired('space', @internal.colorspace_validator);
+p.addRequired('space', @internal.cs_name_validator);
 p.parse(space);
 
 W_D65 = [0.95047, 1.00000, 1.08883];
