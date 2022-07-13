@@ -36,27 +36,27 @@ switch lower(p.Results.method)
         rgb = clip(rgb);
     case 'desat'
         if ~p.Results.Linear
-            rgb = rgb_ungamma(rgb, param);
+            rgb = colorspace.rgb_ungamma(rgb, param);
         end
         rgb = desat(rgb);
         if ~p.Results.Linear
-            rgb = rgb_gamma(rgb, param);
+            rgb = colorspace.rgb_gamma(rgb, param);
         end
     case 'greying'
         if ~p.Results.Linear
-            rgb = rgb_ungamma(rgb, param);
+            rgb = colorspace.rgb_ungamma(rgb, param);
         end
         rgb = greying(rgb, param);
         if ~p.Results.Linear
-            rgb = rgb_gamma(rgb, param);
+            rgb = colorspace.rgb_gamma(rgb, param);
         end
     case 'minuv'
         if ~p.Results.Linear
-            rgb = rgb_ungamma(rgb, param);
+            rgb = colorspace.rgb_ungamma(rgb, param);
         end
         rgb = minuv(rgb, param);
         if ~p.Results.Linear
-            rgb = rgb_gamma(rgb, param);
+            rgb = colorspace.rgb_gamma(rgb, param);
         end
     otherwise
         warning('Cannot recognize method! Use clip as default!');

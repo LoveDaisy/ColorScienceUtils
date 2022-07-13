@@ -29,5 +29,5 @@ end
 mat = internal.xyz_rgb_mat(param);
 rgb_lin = xyz * mat;
 rgb_lin = internal.clamp_rgb(rgb_lin, param, p.Results.method, 'Linear', true);
-rgb = rgb_gamma(rgb_lin, param);
+rgb = colorspace.rgb_gamma(rgb_lin, param);
 end

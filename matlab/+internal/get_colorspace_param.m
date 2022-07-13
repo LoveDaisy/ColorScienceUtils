@@ -10,7 +10,7 @@ function pram = get_colorspace_param(space)
 %               .w_name:    char vector, the white point name, such as 'D65', etc.
 %               .rgb:       3*2 matrix, each row represents a color, xy coordinate.
 %               .tsf:       1*4 vector, [alpha, beta, gamma, k].
-%                           See rgb_gamma & rgb_ungamma for detail.
+%                           See colorspace.rgb_gamma & colorspace.rgb_ungamma for detail.
 
 p = inputParser;
 p.addRequired('space', @internal.cs_name_validator);
