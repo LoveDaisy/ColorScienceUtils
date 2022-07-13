@@ -89,7 +89,7 @@ end
 
 function rgb_lin = greying(rgb_lin, param)
 % De-saturating in XYZ space
-m = xyz_rgb_mat(param);
+m = internal.xyz_rgb_mat(param);
 xyz = rgb_lin / m;
 gray = xyz(:, 2) * param.w;
 
@@ -108,7 +108,7 @@ end
 
 function rgb_lin = minuv(rgb_lin, param)
 % De-saturating directly in Luv space
-m = xyz_rgb_mat(param);
+m = internal.xyz_rgb_mat(param);
 xyz = rgb_lin / m;
 Y = xyz(:, 2);
 uv = [4 * xyz(:, 1), 9 * xyz(:, 2)] ./ (xyz * [1; 15; 3]);

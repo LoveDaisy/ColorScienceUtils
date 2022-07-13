@@ -23,12 +23,22 @@ else
     param = p.Results.param;
 end
 
-g = 1 / param.gamma;
-x0 = ((1 + param.alpha) * (1 - g) / param.alpha)^(-1 / g);
-k = (1 + param.alpha) * x0^(g - 1);
+g = 1 / param.tsf(3);
+a = param.tsf(1);
+x0 = param.tsf(2);
+k = param.tsf(4);
+
+assert(~isnan(g) && ~isnan(a));
+
+if isnan(x0)
+    x0 = ((1 + a) * (1 - g) / a)^(-1 / g);
+end
+if isnan(k)
+    k = (1 + a) * x0^(g - 1);
+end
 idx = abs(rgb_lin) < x0;
 
 rgb = rgb_lin;
 rgb(idx) = rgb(idx) * k;
-rgb(~idx) = sign(rgb(~idx)) .* abs(rgb(~idx)).^g * (1 + param.alpha) - param.alpha;
+rgb(~idx) = sign(rgb(~idx)) .* abs(rgb(~idx)).^g * (1 + a) - a;
 end

@@ -7,7 +7,6 @@ if ischar(in)
     res = internal.cs_name_validator(in);
 else
     res = isstruct(in) && isscalar(in) && ...
-        isfield(in, 'w') && isfield(in, 'w_name') && isfield(in, 'rgb') && isfield(in, 'alpha') && ...
-        isfield(in, 'gamma');
+        isfield(in, 'w') && isfield(in, 'w_name') && isfield(in, 'rgb') && isfield(in, 'tsf');
 end
 end

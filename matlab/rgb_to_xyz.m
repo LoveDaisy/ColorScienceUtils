@@ -24,7 +24,7 @@ else
     param = p.Result.param;
 end
 
-mat = xyz_rgb_mat(param);
+mat = internal.xyz_rgb_mat(param);
 rgb_lin = rgb_ungamma(rgb, param);
 xyz = rgb_lin / mat;
 end

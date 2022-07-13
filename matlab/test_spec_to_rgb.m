@@ -11,7 +11,7 @@ pix_num = prod(img_size);
 
 for i = 1:length(y_ev_store)
 % for i = 31
-    rgb = spec_to_rgb(spec, 'ColorSpace', 'sRGB', 'Mixed', false, 'Y', 2^y_ev_store(i), ...
+    rgb = spec_to_rgb(spec, 'ColorSpace', 'srgb', 'Mixed', false, 'Y', 2^y_ev_store(i), ...
         'Clamping', 'minuv');
     rgb_img(i, :, :) = reshape(rgb, [1, length(wl), 3]);
 end
