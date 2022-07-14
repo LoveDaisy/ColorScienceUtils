@@ -8,7 +8,7 @@ function rgb = rgb_gamma(rgb_lin, varargin)
 % INPUT
 %   rgb:                n*3 matrix, each row represents a color.
 %   cs_name:            A string of colorspace name. See internal.cs_name_validator for detail.
-%   param:              A struct from internal.get_colorspace_param;
+%   param:              A struct from colorspace.get_param;
 % OUTPUT
 %   rgb:                n*3 matrix, the converted color.
 
@@ -18,7 +18,7 @@ p.addOptional('param', 'sRGB', @internal.cs_validator);
 p.parse(rgb_lin, varargin{:});
 
 if ischar(p.Results.param)
-    param = internal.get_colorspace_param(p.Results.param);
+    param = colorspace.get_param(p.Results.param);
 else
     param = p.Results.param;
 end

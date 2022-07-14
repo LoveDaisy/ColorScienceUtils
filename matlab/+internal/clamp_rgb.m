@@ -12,7 +12,7 @@ function rgb = clamp_rgb(rgb, varargin)
 %   rgb:                n*3 matrix. Each row represents a color.
 %   cs_name:            A string for colorspace name. Default is 'sRGB'.
 %                       See internal.cs_name_validator for detail.
-%   param:              A struct returned by internal.get_colorspace_param.
+%   param:              A struct returned by colorspace.get_param.
 %   method:             Method used for adjustment. Default is 'Greying'.
 %                       See internal.rgb_clamping_validator
 % PARAMETER
@@ -26,42 +26,35 @@ p.addParameter('Linear', true, @(x) islogical(x) && isscalar(x));
 p.parse(rgb, varargin{:});
 
 if ischar(p.Results.param)
-    param = internal.get_colorspace_param(p.Results.param);
+    param = colorspace.get_param(p.Results.param);
 else
     param = p.Results.param;
+end
+
+if ~p.Results.Linear
+    rgb = colorspace.rgb_ungamma(rgb, param);
 end
 
 switch lower(p.Results.method)
     case 'clip'
         rgb = clip(rgb);
     case 'desat'
-        if ~p.Results.Linear
-            rgb = colorspace.rgb_ungamma(rgb, param);
-        end
         rgb = desat(rgb);
-        if ~p.Results.Linear
-            rgb = colorspace.rgb_gamma(rgb, param);
-        end
     case 'greying'
-        if ~p.Results.Linear
-            rgb = colorspace.rgb_ungamma(rgb, param);
-        end
         rgb = greying(rgb, param);
-        if ~p.Results.Linear
-            rgb = colorspace.rgb_gamma(rgb, param);
-        end
     case 'minuv'
-        if ~p.Results.Linear
-            rgb = colorspace.rgb_ungamma(rgb, param);
-        end
         rgb = minuv(rgb, param);
-        if ~p.Results.Linear
-            rgb = colorspace.rgb_gamma(rgb, param);
-        end
+    case 'minitp'
+        rgb = minitp(rgb, param);
     otherwise
         warning('Cannot recognize method! Use clip as default!');
         rgb = clip(rgb);
 end
+
+if ~p.Results.Linear
+    rgb = colorspace.rgb_gamma(rgb, param);
+end
+rgb = min(max(rgb, 0), 1);
 end
 
 
@@ -89,7 +82,7 @@ end
 
 function rgb_lin = greying(rgb_lin, param)
 % De-saturating in XYZ space
-m = internal.xyz_rgb_mat(param);
+m = colorspace.xyz_rgb_mat(param);
 xyz = rgb_lin / m;
 gray = xyz(:, 2) * param.w;
 
@@ -108,7 +101,7 @@ end
 
 function rgb_lin = minuv(rgb_lin, param)
 % De-saturating directly in Luv space
-m = internal.xyz_rgb_mat(param);
+m = colorspace.xyz_rgb_mat(param);
 xyz = rgb_lin / m;
 Y = xyz(:, 2);
 uv = [4 * xyz(:, 1), 9 * xyz(:, 2)] ./ (xyz * [1; 15; 3]);
@@ -126,9 +119,17 @@ a0 = min(a0, 1);
 a1 = min(a1, 1);
 a0(a0 < 0) = inf;
 a1(a1 < 0) = inf;
-
 a = min(min(a0, a1), [], 2);
+
 uv = a .* uv + (1 - a) .* uv_n;
 xyz = [9 * uv(:, 1), 4 * uv(:, 2), 12 - 3 * uv(:, 1) - 20 * uv(:, 2)] .* Y ./ (4 * uv(:, 2));
 rgb_lin = xyz * m;
+end
+
+
+function rgb_lin = minitp(rgb_lin, param)
+% Scale in XYZ space
+m = colorspace.xyz_rgb_mat(param);
+xyz = rgb_lin * m;
+lms = colorspace.xyz2lms(xyz);
 end

@@ -8,7 +8,7 @@ function m = xyz_rgb_mat(varargin)
 % INPUT
 %   cs_name:        A string for colorspace name. Default is 'sRGB'.
 %                   See internal.cs_name_validator for detail.
-%   param:          A struct returned from internal.get_colorspace_param.
+%   param:          A struct returned from colorspace.get_param.
 % OUTPUT
 %   m:              3*3 matrix. rgb_linear = xyz * m, where rgb and xyz
 %                   are all n*3 matrix, and each row represents a color.
@@ -18,7 +18,7 @@ p.addOptional('param', 'sRGB', @internal.cs_validator);
 p.parse(varargin{:});
 
 if ischar(p.Results.param)
-    param = internal.get_colorspace_param(p.Results.param);
+    param = colorspace.get_param(p.Results.param);
 else
     param = p.Results.param;
 end

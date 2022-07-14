@@ -36,5 +36,5 @@ else
 end
 
 xyz = xyz / max(xyz(:, 2)) * p.Results.Y;
-rgb = colorspace.xyz_to_rgb(xyz, p.Results.ColorSpace, p.Results.Clamping);
+rgb = colorspace.xyz2rgb(xyz, p.Results.ColorSpace, p.Results.Clamping);
 end
