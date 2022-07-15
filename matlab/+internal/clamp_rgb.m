@@ -42,8 +42,6 @@ switch lower(p.Results.method)
         rgb = desat(rgb);
     case 'greying'
         rgb = greying(rgb, param);
-    case 'minuv'
-        rgb = minuv(rgb, param);
     case 'minitp'
         rgb = minitp(rgb, param);
     otherwise
@@ -99,37 +97,35 @@ rgb_lin = xyz * m;
 end
 
 
-function rgb_lin = minuv(rgb_lin, param)
-% De-saturating directly in Luv space
-m = colorspace.xyz_rgb_mat(param);
-xyz = rgb_lin / m;
-Y = xyz(:, 2);
-uv = [4 * xyz(:, 1), 9 * xyz(:, 2)] ./ (xyz * [1; 15; 3]);
-gray = Y * param.w;
-uv_n = [4 * gray(:, 1), 9 * gray(:, 2)] ./ (gray * [1; 15; 3]);
-
-cu = Y * (9 * m(1, :) - 3 * m(3, :));
-cv0 = Y * 4 * m(2, :) - Y * 20 * m(3, :) - 4 * 0;
-cv1 = Y * 4 * m(2, :) - Y * 20 * m(3, :) - 4 * 1;
-a0 = -(uv_n(:, 1) .* cu + uv_n(:, 2) .* cv0 + Y * 12 * m(3, :)) ./ ...
-    ((uv(:, 1) - uv_n(:, 1)) .* cu + (uv(:, 2) - uv_n(:, 2)) .* cv0);
-a1 = -(uv_n(:, 1) .* cu + uv_n(:, 2) .* cv1 + Y * 12 * m(3, :)) ./ ...
-    ((uv(:, 1) - uv_n(:, 1)) .* cu + (uv(:, 2) - uv_n(:, 2)) .* cv1);
-a0 = min(a0, 1);
-a1 = min(a1, 1);
-a0(a0 < 0) = inf;
-a1(a1 < 0) = inf;
-a = min(min(a0, a1), [], 2);
-
-uv = a .* uv + (1 - a) .* uv_n;
-xyz = [9 * uv(:, 1), 4 * uv(:, 2), 12 - 3 * uv(:, 1) - 20 * uv(:, 2)] .* Y ./ (4 * uv(:, 2));
-rgb_lin = xyz * m;
-end
-
-
 function rgb_lin = minitp(rgb_lin, param)
 % Scale in XYZ space
-m = colorspace.xyz_rgb_mat(param);
-xyz = rgb_lin * m;
-lms = colorspace.xyz2lms(xyz);
+m1 = colorspace.xyz_rgb_mat(param);     % xyz to rgb matrix
+m2 = colorspace.xyz_lms_mat();          % xyz to lms matrix
+m3 = [2048, 2048, 0;
+    6610, -13613, 7003;
+    17933, -17390, -543]' / 4096;       % lms to ictcp matrix
+
+scale = 150;
+rgb_ictcp = @(x) colorspace.pq_inverse_eotf(x * scale / m1 * m2) * m3;
+ictcp_rgb = @(x) colorspace.pq_eotf(x / m3) / m2 * m1 / scale;
+
+ictcp = rgb_ictcp(rgb_lin);
+
+options = optimoptions(@fminunc, 'Display', 'off');
+% options = optimset('Display', 'off', 'MaxFunEvals', 1000);
+f = @(x, c, lambda) log(norm(x .* [1, .5, 1]) + ...
+    lambda * sum(max(abs(ictcp_rgb(x + c) - 0.5) - 0.5, 0)));
+
+d_ictcp = zeros(size(ictcp));
+for i = 1:size(ictcp, 1)
+    dx0 = [0, -0.3*ictcp(i, 2:3)];
+%     for lambda = exp(-1.6:.4:3.2)
+%         [dx0, e, flag, info] = fminunc(@(x) f(x, ictcp(i, :), lambda), dx0, options);
+%     end
+    lambda = 1;
+    [dx0, e, flag, info] = fminunc(@(x) f(x, ictcp(i, :), lambda), dx0, options);
+    d_ictcp(i, :) = dx0;
+end
+
+rgb_lin = ictcp_rgb(ictcp + d_ictcp);
 end
