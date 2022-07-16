@@ -1,26 +1,24 @@
 clear; close all; clc;
 
-wl = (400:5:700)';
-spec = [wl, black_body_radiance(wl, 6500)];
+blackbody_temperature = 6500;
+wl = (400:1:700)';
+spec = [wl, black_body_radiance(wl, blackbody_temperature)];
 
-y_ev_store = -4:.2:3;
+y_ev_store = -4:.01:3;
 
 rgb_img = zeros(length(y_ev_store), length(wl), 3);
 img_size = [length(y_ev_store), length(wl)];
 pix_num = prod(img_size);
 
-method = 'minitp';
+method = 'greying';
 for i = 1:length(y_ev_store)
-% for i = 65
     rgb = spec_to_rgb(spec, 'ColorSpace', 'srgb', 'Mixed', false, 'Y', 2^y_ev_store(i), ...
         'Clamping', method);
     rgb_img(i, :, :) = reshape(rgb, [1, length(wl), 3]);
-    fprintf('image line #%d/%d done!\n', i, length(y_ev_store));
-% end
+end
 
 %%
-% yi = 65;
-yi = i;
+yi = 301;
 
 fig1 = figure(1); clf;
 set(gcf, 'Position', [200, 20, 1000, 540]);
@@ -38,14 +36,12 @@ axis xy;
 xlabel('Wavelength (nm)', 'FontSize', 16);
 set(gca, 'FontSize', 13, 'ytick', []);
 
-% figure(2); clf;
-% set(gcf, 'Position', [200, 200, 1000, 540]);
-% set(gca, 'Position', [0.06, 0.12, 0.88, 0.8]);
-% plot(wl, reshape(rgb_img(yi, :, :), [], 3));
-% set(gca, 'FontSize', 13, 'ylim', [0, 1]);
-% xlabel('Wavelength (nm)', 'FontSize', 16);
-% title('RGB components', 'FontSize', 18);
-
-end
+figure(2); clf;
+set(gcf, 'Position', [200, 200, 1000, 540]);
+set(gca, 'Position', [0.06, 0.12, 0.88, 0.8]);
+plot(wl, reshape(rgb_img(yi, :, :), [], 3));
+set(gca, 'FontSize', 13, 'ylim', [0, 1]);
+xlabel('Wavelength (nm)', 'FontSize', 16);
+title('RGB components', 'FontSize', 18);
 
 % saveas(fig1, sprintf('img/spectra_%s.png', method));
