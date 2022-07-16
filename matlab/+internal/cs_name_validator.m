@@ -4,11 +4,8 @@ function res = cs_name_validator(space)
 % OUTPUT
 %   res:            true if input space is a valid name, false otherwise.
 
-if ~ischar(space)
-    res = false;
-elseif strcmpi(space, 'sRGB') || strcmpi(space, 'AdobeRGB') || strcmpi(space, 'ARGB')
-    res = true;
-else
-    res = false;
-end
+res = ischar(space) && (...
+    strcmpi(space, 'sRGB') || ...
+    strcmpi(space, 'AdobeRGB') || strcmpi(space, 'ARGB') ...
+    );
 end

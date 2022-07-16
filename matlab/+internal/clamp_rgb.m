@@ -31,13 +31,18 @@ else
     param = p.Results.param;
 end
 
+switch lower(p.Results.method)
+    case 'none'
+        return;
+    case 'clip'
+        rgb = clip(rgb);
+        return
+end
+
 if ~p.Results.Linear
     rgb = colorspace.rgb_ungamma(rgb, param);
 end
-
 switch lower(p.Results.method)
-    case 'clip'
-        rgb = clip(rgb);
     case 'desat'
         rgb = desat(rgb);
     case 'greying'
@@ -48,7 +53,6 @@ switch lower(p.Results.method)
         warning('Cannot recognize method! Use clip as default!');
         rgb = clip(rgb);
 end
-
 if ~p.Results.Linear
     rgb = colorspace.rgb_gamma(rgb, param);
 end
