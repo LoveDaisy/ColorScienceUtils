@@ -31,16 +31,12 @@ else
 end
 if ~p.Results.Linear
     rgb_lin = colorspace.rgb_ungamma(rgb, param);
+    param.tsf = [0, 0. 1, 0];
 else
     rgb_lin = rgb;
 end
 
-m1 = colorspace.xyz_rgb_mat(param);     % xyz to rgb matrix
-m2 = colorspace.xyz_lms_mat();          % xyz to lms matrix
-m3 = [2048, 2048, 0;
-    6610, -13613, 7003;
-    17933, -17390, -543]' / 4096;       % lms to ictcp matrix, campatibale for PQ transfer
-
 scale = p.Results.Scale;
-ictcp = internal.pq_inverse_eotf(rgb_lin * scale / m1 * m2) * m3;
+xyz = colorspace.rgb2xyz(rgb_lin * scale, param);
+ictcp = colorspace.xyz2ictcp(xyz);
 end

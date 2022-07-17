@@ -29,18 +29,11 @@ if ischar(p.Results.param)
 else
     param = p.Results.param;
 end
-
-m1 = colorspace.xyz_rgb_mat(param);     % xyz to rgb matrix
-m2 = colorspace.xyz_lms_mat();          % xyz to lms matrix
-m3 = [2048, 2048, 0;
-    6610, -13613, 7003;
-    17933, -17390, -543]' / 4096;       % lms to ictcp matrix, campatibale for PQ transfer
+if p.Results.Linear
+    param.tsf = [0, 0, 1 0];
+end
 
 scale = p.Results.Scale;
-rgb_lin = internal.pq_eotf(ictcp / m3) / m2 * m1 / scale;
-if ~p.Results.Linear
-    rgb = colorspace.rgb_gamma(rgb_lin, param);
-else
-    rgb = rgb_lin;
-end
+xyz = colorspace.ictcp2xyz(ictcp);
+rgb = colorspace.xyz2rgb(xyz / scale, param);
 end
