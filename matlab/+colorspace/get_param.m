@@ -38,7 +38,7 @@ else
     warning('Input color space %d cannot recognize! Use default sRGB!', space);
 end
 
-pram.w = internal.get_white_point(w_name);;
+pram.w = internal.get_white_point(w_name);
 pram.w_name = w_name;
 pram.rgb = pri_xy;
 pram.tsf = [a, b, g, k];

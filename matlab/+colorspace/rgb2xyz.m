@@ -21,7 +21,7 @@ p.parse(rgb, varargin{:});
 if ischar(p.Results.param)
     param = colorspace.get_param(p.Results.param);
 else
-    param = p.Result.param;
+    param = p.Results.param;
 end
 
 mat = colorspace.xyz_rgb_mat(param);
