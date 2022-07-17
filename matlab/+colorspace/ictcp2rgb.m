@@ -37,7 +37,7 @@ m3 = [2048, 2048, 0;
     17933, -17390, -543]' / 4096;       % lms to ictcp matrix, campatibale for PQ transfer
 
 scale = p.Results.Scale;
-rgb_lin = colorspace.pq_eotf(ictcp / m3) / m2 * m1 / scale;
+rgb_lin = internal.pq_eotf(ictcp / m3) / m2 * m1 / scale;
 if ~p.Results.Linear
     rgb = colorspace.rgb_gamma(rgb_lin, param);
 else

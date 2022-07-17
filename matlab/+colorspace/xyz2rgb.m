@@ -12,12 +12,12 @@ function rgb = xyz2rgb(xyz, varargin)
 %                   See internal.cs_name_validator for detail.
 %   param:          A struct returned by colorspace.get_param.
 %   method:         A string for RGB adjusting method. Default is 'Greying'.
-%                   See internal.rgb_clamping_validator for detail.
+%                   See internal.rgb_compression_validator for detail.
 
 p = inputParser;
 p.addRequired('xyz', @(x) validateattributes(x, {'numeric'}, {'2d', 'ncols', 3}));
 p.addOptional('param', 'sRGB', @internal.cs_validator);
-p.addOptional('method', 'clip', @internal.rgb_clamping_validator);
+p.addOptional('method', 'clip', @internal.rgb_compression_validator);
 p.parse(xyz, varargin{:});
 
 if ischar(p.Results.param)

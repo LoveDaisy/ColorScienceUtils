@@ -42,5 +42,5 @@ m3 = [2048, 2048, 0;
     17933, -17390, -543]' / 4096;       % lms to ictcp matrix, campatibale for PQ transfer
 
 scale = p.Results.Scale;
-ictcp = colorspace.pq_inverse_eotf(rgb_lin * scale / m1 * m2) * m3;
+ictcp = internal.pq_inverse_eotf(rgb_lin * scale / m1 * m2) * m3;
 end

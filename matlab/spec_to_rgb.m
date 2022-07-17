@@ -14,7 +14,7 @@ function rgb = spec_to_rgb(spec, varargin)
 %                       If set to false, each row in spec will result a color, representing
 %                       a pure spectral color.
 %   'Clamping':         A string for RGB clamping method. Default is 'Clip'.
-%                       see internal.rgb_clamping_validator for detail.
+%                       see internal.rgb_compression_validator for detail.
 %   'Y':                Expected output luminance (Y component). Default is 1.0.
 %                       If 'Mixed' is set to false, then 'Y' is the max lumincance.
 % OUTPUT
@@ -25,7 +25,7 @@ p = inputParser;
 p.addRequired('spec', @(x) validateattributes(x, {'numeric'}, {'2d', 'ncols', 2}));
 p.addParameter('ColorSpace', 'sRGB', @internal.cs_name_validator);
 p.addParameter('Mixed', true, @(x) validateattributes(x, {'logical'}, {'scalar'}));
-p.addParameter('Clamping', 'DeSat', @internal.rgb_clamping_validator);
+p.addParameter('Clamping', 'DeSat', @internal.rgb_compression_validator);
 p.addParameter('Y', 1, @(x) validateattributes(x, {'numeric'}, {'scalar'}));
 p.parse(spec, varargin{:});
 

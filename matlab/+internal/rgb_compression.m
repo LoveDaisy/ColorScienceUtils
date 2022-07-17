@@ -14,14 +14,14 @@ function rgb = rgb_compression(rgb, varargin)
 %                       See internal.cs_name_validator for detail.
 %   param:              A struct returned by colorspace.get_param.
 %   method:             Method used for adjustment. Default is 'Greying'.
-%                       See internal.rgb_clamping_validator
+%                       See internal.rgb_compression_validator
 % PARAMETER
 %   'Linear':           {true} | false. Whether input RGB is in linear space.
 
 p = inputParser;
 p.addRequired('rgb', @(x) validateattributes(x, {'numeric'}, {'2d', 'ncols', 3}));
 p.addOptional('param', 'sRGB', @internal.cs_validator);
-p.addOptional('method', 'Greying', @internal.rgb_clamping_validator);
+p.addOptional('method', 'Greying', @internal.rgb_compression_validator);
 p.addParameter('Linear', true, @(x) islogical(x) && isscalar(x));
 p.parse(rgb, varargin{:});
 
@@ -47,8 +47,8 @@ switch lower(p.Results.method)
         rgb = desat(rgb);
     case 'greying'
         rgb = greying(rgb, param);
-    case 'minitp'
-        rgb = minitp(rgb, param);
+    case 'sgck'
+        rgb = sgck_lab(rgb, param);
     otherwise
         warning('Cannot recognize method! Use clip as default!');
         rgb = clip(rgb);
@@ -76,8 +76,8 @@ a0 = min(a0, 1);
 a1 = min(a1, 1);
 a0(a0 < 0) = inf;
 a1(a1 < 0) = inf;
-
 a = min(min(a0, a1), [], 2);
+
 rgb_lin = a .* rgb_lin + (1 - a) .* gray;
 end
 
@@ -94,42 +94,49 @@ a0 = min(a0, 1);
 a1 = min(a1, 1);
 a0(a0 < 0) = inf;
 a1(a1 < 0) = inf;
-
 a = min(min(a0, a1), [], 2);
+
 xyz = a .* xyz + (1 - a) .* gray;
 rgb_lin = xyz * m;
 end
 
 
-function rgb_lin = minitp(rgb_lin, param)
-% Scale in XYZ space
-m1 = colorspace.xyz_rgb_mat(param);     % xyz to rgb matrix
-m2 = colorspace.xyz_lms_mat();          % xyz to lms matrix
-m3 = [2048, 2048, 0;
-    6610, -13613, 7003;
-    17933, -17390, -543]' / 4096;       % lms to ictcp matrix
+function rgb_lin = sgck_lab(rgb_lin, param)
+% SGCK algorithm
+m = colorspace.xyz_rgb_mat(param);
+rgb_pri = [0, 0, 0;
+    0, 0, 1;
+    0, 1, 0;
+    0, 1, 1;
+    1, 0, 0;
+    1, 0, 1;
+    1, 1, 0;
+    1, 1, 1];
+xyz_pri = rgb_pri / m;
+lab_pri = colorspace.xyz2lab(xyz_pri);
+[~, idx] = max(sum(lab_pri(:, 2:3).^2, 2));
+lab_E = [lab_pri(idx, 1), 0, 0];
+lab = colorspace.xyz2lab(rgb_lin / m);
+num = size(rgb_lin, 1);
 
-scale = 150;
-rgb_ictcp = @(x) colorspace.pq_inverse_eotf(x * scale / m1 * m2) * m3;
-ictcp_rgb = @(x) colorspace.pq_eotf(x / m3) / m2 * m1 / scale;
-
-ictcp = rgb_ictcp(rgb_lin);
-
-options = optimoptions(@fminunc, 'Display', 'off');
-% options = optimset('Display', 'off', 'MaxFunEvals', 1000);
-f = @(x, c, lambda) log(norm(x .* [1, .5, 1]) + ...
-    lambda * sum(max(abs(ictcp_rgb(x + c) - 0.5) - 0.5, 0)));
-
-d_ictcp = zeros(size(ictcp));
-for i = 1:size(ictcp, 1)
-    dx0 = [0, -0.3*ictcp(i, 2:3)];
-%     for lambda = exp(-1.6:.4:3.2)
-%         [dx0, e, flag, info] = fminunc(@(x) f(x, ictcp(i, :), lambda), dx0, options);
-%     end
-    lambda = 1;
-    [dx0, e, flag, info] = fminunc(@(x) f(x, ictcp(i, :), lambda), dx0, options);
-    d_ictcp(i, :) = dx0;
+al = zeros(num, 1);
+au = ones(num, 1);
+d = max(sum(au - al, 2));
+while d > 1e-4
+    rgbl = colorspace.lab2xyz(al .* lab + (1 - al) .* lab_E) * m;
+    rgbu = colorspace.lab2xyz(au .* lab + (1 - au) .* lab_E) * m;
+    idx = find(min(rgbl, [], 2) < 0 | max(rgbl, [], 2) > 1 | ...
+        min(rgbu, [], 2) < 0 | max(rgbu, [], 2) > 1);
+    am = (al(idx) + au(idx)) / 2;
+    rgbm = colorspace.lab2xyz(am .* lab(idx, :) + (1 - am) .* lab_E(idx, :)) * m;
+    
+    tmp_idx = rgbm .* (rgbl(idx)) > 0;
+    al(idx(tmp_idx)) = am(tmp_idx);
+    tmp_idx = rgbm .* (rgbu(idx)) > 0;
+    au(idx(tmp_idx)) = am(tmp_idx);
+    d = max(sum(au - al, 2));
 end
 
-rgb_lin = ictcp_rgb(ictcp + d_ictcp);
+lab = a .* lab + (1 - a) .* lab_E;
+rgb_lin = colorspace.lab2xyz(lab) * m;
 end
