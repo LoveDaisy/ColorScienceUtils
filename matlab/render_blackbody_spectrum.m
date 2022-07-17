@@ -8,7 +8,7 @@ ev_store = -4:.01:3;
 ev_num = length(ev_store);
 img_spec_data = [repmat(wl, [ev_num, 1]), kron(2.^ev_store', spec(:,2))];
 
-method = 'greying';
+method = 'greyingictcp';
 rgb = spec_to_rgb(img_spec_data, ...
     'ColorSpace', 'srgb', 'Mixed', false, ...
     'Y', 2^max(ev_store), 'Clamping', method);
