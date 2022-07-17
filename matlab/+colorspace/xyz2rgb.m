@@ -28,6 +28,6 @@ end
 
 mat = colorspace.xyz_rgb_mat(param);
 rgb_lin = xyz * mat;
-rgb_lin = internal.clamp_rgb(rgb_lin, param, p.Results.method, 'Linear', true);
+rgb_lin = internal.rgb_compression(rgb_lin, param, p.Results.method, 'Linear', true);
 rgb = colorspace.rgb_gamma(rgb_lin, param);
 end

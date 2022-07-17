@@ -1,13 +1,13 @@
-function rgb = clamp_rgb(rgb, varargin)
+function rgb = rgb_compression(rgb, varargin)
 % DESCRIPTION
 %   If input rgb data is out of range [0, 1], then adjust it back within range,
 %   and try to keep it perceptively the same.
 % SYNTAX
-%   rgb = clamp_rgb(rgb);
-%   rgb = clamp_rgb(rgb, cs_name);
-%   rgb = clamp_rgb(rgb, param);
-%   rgb = clamp_rgb(..., method);
-%   rgb = clamp_rgb(..., Name, Value...);
+%   rgb = rgb_compression(rgb);
+%   rgb = rgb_compression(rgb, cs_name);
+%   rgb = rgb_compression(rgb, param);
+%   rgb = rgb_compression(..., method);
+%   rgb = rgb_compression(..., Name, Value...);
 % INPUT
 %   rgb:                n*3 matrix. Each row represents a color.
 %   cs_name:            A string for colorspace name. Default is 'sRGB'.
