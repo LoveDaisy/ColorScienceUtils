@@ -110,52 +110,20 @@ function rgb_lin = greying_lab(rgb_lin, param)
 m = colorspace.xyz_rgb_mat(param);
 num = size(rgb_lin, 1);
 lab = colorspace.xyz2lab(rgb_lin / m);
-tol = 1e-8;
-
 lab_E = [lab(:, 1), zeros(num, 2)];
-rgb_E = colorspace.lab2xyz(lab_E) * m;
 
 % Binary search for a0
-al = zeros(num, 1);
-au = ones(num, 1);
-idx = min(rgb_lin, [], 2) >= -tol | max(rgb_E, [], 2) <= tol;
-al(idx) = au(idx);
-while max(au - al) > 1e-4
-    rgbl = colorspace.lab2xyz(al .* lab + (1 - al) .* lab_E) * m;
-    rgbu = colorspace.lab2xyz(au .* lab + (1 - au) .* lab_E) * m;
-    minl = min(rgbl, [], 2);
-    minu = min(rgbu, [], 2);
-    idx = find(minl .* minu <= 0);
-    am = (al(idx) + au(idx)) / 2;
-    rgbm = colorspace.lab2xyz(am .* lab(idx, :) + (1 - am) .* lab_E(idx, :)) * m;
-    minm = min(rgbm, [], 2);
-    
-    tmp_idx = minm .* minl(idx) >= 0;
-    al(idx(tmp_idx)) = am(tmp_idx);
-    au(idx(~tmp_idx)) = am(~tmp_idx);
-end
-a0 = (al + au) / 2;
+fun = @(a, idx) min(colorspace.lab2xyz(a(idx) .* lab(idx, :) + ...
+    (1 - a(idx)) .* lab_E(idx, :)) * m, [], 2);
+a0 = internal.solve_equation_binary(fun, ...
+    zeros(num, 1), zeros(num, 1), ones(num, 1));
 
 % Binary search for a1
-al = zeros(num, 1);
-au = ones(num, 1);
-idx = max(rgb_lin, [], 2) <= 1 + tol | min(rgb_E, [], 2) >= 1 - tol;
-al(idx) = au(idx);
-while max(au - al) > 1e-4
-    rgbl = colorspace.lab2xyz(al .* lab + (1 - al) .* lab_E) * m;
-    rgbu = colorspace.lab2xyz(au .* lab + (1 - au) .* lab_E) * m;
-    maxl = max(rgbl, [], 2);
-    maxu = max(rgbu, [], 2);
-    idx = find((maxl - 1) .* (maxu - 1) <= 0);
-    am = (al(idx) + au(idx)) / 2;
-    rgbm = colorspace.lab2xyz(am .* lab(idx, :) + (1 - am) .* lab_E(idx, :)) * m;
-    maxm = max(rgbm, [], 2);
-    
-    tmp_idx = (maxm - 1) .* (maxl(idx) - 1) >= 0;
-    al(idx(tmp_idx)) = am(tmp_idx);
-    au(idx(~tmp_idx)) = am(~tmp_idx);
-end
-a1 = (al + au) / 2;
+fun = @(a, idx) max(colorspace.lab2xyz(a(idx) .* lab(idx, :) + ...
+    (1 - a(idx)) .* lab_E(idx, :)) * m, [], 2);
+a1 = internal.solve_equation_binary(fun, ...
+    ones(num, 1), zeros(num, 1), ones(num, 1));
+
 a = min(a0, a1);
 
 lab = a .* lab + (1 - a) .* lab_E;
@@ -167,73 +135,25 @@ end
 function rgb_lin = greying_ictcp(rgb_lin, param)
 % Greying in Lab space
 m = colorspace.xyz_rgb_mat(param);
-tol = 1e-8;
 scale = 1;
 num = size(rgb_lin, 1);
 ictcp = colorspace.xyz2ictcp(rgb_lin / m * scale);
-
 ictcp_E = [ictcp(:, 1), zeros(num, 2)];
-rgb_E = colorspace.ictcp2xyz(ictcp_E) * m / scale;
-minE = min(rgb_E, [], 2);
-maxE = max(rgb_E, [], 2);
 
-% Binary search for a0
 % FIXME!!! rgb -> ictcp nonlinear near blue hue.
-al = zeros(num, 1);
-au = ones(num, 1);
-idx = sum(rgb_lin .* rgb_E >= 0, 2) == 3;
-al(idx) = au(idx);
-while max(au - al) > 1e-4
-    rgbl = colorspace.ictcp2xyz(al .* ictcp + (1 - al) .* ictcp_E) * m / scale;
-    rgbu = colorspace.ictcp2xyz(au .* ictcp + (1 - au) .* ictcp_E) * m / scale;
-    minl = min(rgbl, [], 2);
-    minu = min(rgbu, [], 2);
-    idx = find(minl .* minu <= 0);
-    am = (al(idx) + au(idx)) / 2;
-    rgbm = colorspace.ictcp2xyz(am .* ictcp(idx, :) + (1 - am) .* ictcp_E(idx, :)) * m / scale;
-    minm = min(rgbm, [], 2);
-    
-    tmp_idx = minm .* minE(idx) < 0;
-    au(idx(tmp_idx)) = am(tmp_idx);
-    if any(tmp_idx)
-        continue;
-    end
-    
-    tmp_idx = minm .* minl(idx) >= 0;
-    al(idx(tmp_idx)) = am(tmp_idx);
-    au(idx(~tmp_idx)) = am(~tmp_idx);
-end
-a0 = (al + au) / 2;
+% Binary search for a0
+fun = @(a, idx) min(colorspace.ictcp2xyz(a(idx) .* ictcp(idx, :) + ...
+    (1 - a(idx)) .* ictcp_E(idx, :)) * m / scale, [], 2);
+a0 = internal.solve_equation_binary(fun, zeros(num, 1), zeros(num, 1), ones(num, 1));
 
 % Binary search for a1
-al = zeros(num, 1);
-au = ones(num, 1);
-idx = max(rgb_lin, [], 2) <= 1 + tol | max(rgb_E, [], 2) >= 1 - tol;
-al(idx) = au(idx);
-while max(au - al) > 1e-4
-    rgbl = colorspace.ictcp2xyz(al .* ictcp + (1 - al) .* ictcp_E) * m / scale;
-    rgbu = colorspace.ictcp2xyz(au .* ictcp + (1 - au) .* ictcp_E) * m / scale;
-    maxl = max(rgbl, [], 2);
-    maxu = max(rgbu, [], 2);
-    idx = find((maxl - 1) .* (maxu - 1) <= 0);
-    am = (al(idx) + au(idx)) / 2;
-    rgbm = colorspace.ictcp2xyz(am .* ictcp(idx, :) + (1 - am) .* ictcp_E(idx, :)) * m / scale;
-    maxm = max(rgbm, [], 2);
-    
-    tmp_idx = maxm .* maxE(idx) < 0;
-    au(idx(tmp_idx)) = am(tmp_idx);
-    if any(tmp_idx)
-        continue;
-    end
-    
-    tmp_idx = (maxm - 1) .* (maxl(idx) - 1) >= 0;
-    al(idx(tmp_idx)) = am(tmp_idx);
-    au(idx(~tmp_idx)) = am(~tmp_idx);
-end
-a1 = (al + au) / 2;
+fun = @(a, idx) max(colorspace.ictcp2xyz(a(idx) .* ictcp(idx, :) + ...
+    (1 - a(idx)) .* ictcp_E(idx, :)) * m / scale, [], 2);
+a1 = internal.solve_equation_binary(fun, ones(num, 1), zeros(num, 1), ones(num, 1));
+
 a = min(a0, a1);
 
 ictcp = a .* ictcp + (1 - a) .* ictcp_E;
-ictcp(ictcp(:, 1) >= internal.pq_inverse_eotf(scale), 2:3) = 0;  % FIXME
+ictcp(ictcp(:, 1) >= internal.pq_inverse_eotf(scale), 2:3) = 0;
 rgb_lin = colorspace.ictcp2xyz(ictcp) * m / scale;
 end
