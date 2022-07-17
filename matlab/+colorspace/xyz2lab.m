@@ -15,17 +15,7 @@ p.parse(xyz);
 w = internal.get_white_point('D65');
 xyz = xyz ./ w;
 lab = zeros(size(xyz));
-lab(:, 1) = 1.16 * f(xyz(:, 2)) - 0.16;
-lab(:, 2) = 5 * (f(xyz(:, 1)) - f(xyz(:, 2)));
-lab(:, 3) = 2 * (f(xyz(:, 2)) - f(xyz(:, 3)));
-end
-
-
-function y = f(x)
-delta = 6 / 29;
-idx = x < delta^3;
-
-y = x;
-y(idx) = x(idx) / 3 / delta^2 + 4 / 29;
-y(~idx) = nthroot(x(~idx), 3);
+lab(:, 1) = 1.16 * internal.lab_transfer(xyz(:, 2)) - 0.16;
+lab(:, 2) = 5 * (internal.lab_transfer(xyz(:, 1)) - internal.lab_transfer(xyz(:, 2)));
+lab(:, 3) = 2 * (internal.lab_transfer(xyz(:, 2)) - internal.lab_transfer(xyz(:, 3)));
 end
