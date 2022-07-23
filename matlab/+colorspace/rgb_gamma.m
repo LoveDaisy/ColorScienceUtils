@@ -7,14 +7,14 @@ function rgb = rgb_gamma(rgb_lin, varargin)
 %   rgb = rgb_gamma(rgb_lin, param);
 % INPUT
 %   rgb:                n*3 matrix, each row represents a color.
-%   cs_name:            A string of colorspace name. See internal.cs_name_validator for detail.
+%   cs_name:            A string of colorspace name. See internal.rgb_name_validator for detail.
 %   param:              A struct from colorspace.get_param;
 % OUTPUT
 %   rgb:                n*3 matrix, the converted color.
 
 p = inputParser;
 p.addRequired('rgb', @(x) validateattributes(x, {'numeric'}, {'2d', 'ncols', 3}));
-p.addOptional('param', 'sRGB', @internal.cs_validator);
+p.addOptional('param', 'sRGB', @internal.rgb_param_validator);
 p.parse(rgb_lin, varargin{:});
 
 if ischar(p.Results.param)

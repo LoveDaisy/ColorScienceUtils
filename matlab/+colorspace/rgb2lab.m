@@ -8,7 +8,7 @@ function lab = rgb2lab(rgb, varargin)
 % INPUT
 %   rgb:            n*3 matrix, each row represents a color.
 %   cs_name:        A string for colorspace name. Default is 'sRGB'.
-%                   See internal.cs_name_validator for detail.
+%                   See internal.rgb_name_validator for detail.
 %   param:          A struct returned from colorspace.get_param.
 % OUTPUT
 %   lab:            n*3 matrix for Lab data. L ranges between [0, 1].

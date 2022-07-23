@@ -11,11 +11,11 @@ invalid_name_list = {'None', 'srss', 'linear'};
 
 for i = 1:length(valid_name_list)
     space = valid_name_list{i};
-    test_case.verifyTrue(internal.cs_name_validator(space));
+    test_case.verifyTrue(internal.rgb_name_validator(space));
 end
 for i = 1:length(invalid_name_list)
     space = invalid_name_list{i};
-    test_case.verifyFalse(internal.cs_name_validator(space));
+    test_case.verifyFalse(internal.rgb_name_validator(space));
 end
 end
 
