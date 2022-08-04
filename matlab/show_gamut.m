@@ -12,11 +12,14 @@ function show_gamut(rgb_gamut, varargin)
 % PARAMETER
 %   'Fill':             true | false. Default is false. Whether to fill the gamut or
 %                       just draw the boundaries.
+%   'Vertex':           true | false. Default is false. Whether to plot vertices of
+%                       the RGB gamut
 
 p = inputParser;
 p.addRequired('rgb_gamut', @internal.rgb_name_validator);
 p.addOptional('space', 'Lab', @(x) ischar(x) && (strcmpi(x, 'Lab') || strcmpi(x, 'ICtCp')));
 p.addParameter('Fill', false, @(x) islogical(x) && isscalar(x));
+p.addParameter('Vertex', false, @(x) islogical(x) && isscalar(x));
 p.parse(rgb_gamut, varargin{:});
 
 end_points = [0, 0, 0, 0, 0, 1;
@@ -55,10 +58,12 @@ switch lower(p.Results.space)
 end
 
 % Plot vertices
-rgb = [end_points(:, 1:3) + end_points(:, 4:6); end_points(:, 4:6); 0, 0, 0];
-rgb = unique(rgb, 'rows');
-data = tf(rgb);
-scatter3(data(:, 2), data(:, 3), data(:, 1), 60, rgb, 'MarkerFaceColor', 'flat');
+if p.Results.Vertex
+    rgb = [end_points(:, 1:3) + end_points(:, 4:6); end_points(:, 4:6); 0, 0, 0];
+    rgb = unique(rgb, 'rows');
+    data = tf(rgb);
+    scatter3(data(:, 2), data(:, 3), data(:, 1), 60, rgb, 'MarkerFaceColor', 'flat');
+end
 
 % Fill gamut
 if p.Results.Fill
