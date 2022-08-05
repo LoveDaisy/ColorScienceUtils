@@ -17,6 +17,7 @@ p.addRequired('space', @internal.cs_name_validator);
 p.parse(space);
 
 if strcmpi(space, 'sRGB')
+    name = 'srgb';
     pri_xy = [0.6400, 0.3300;
         0.3000, 0.6000;
         0.1500, 0.0600];
@@ -28,6 +29,7 @@ if strcmpi(space, 'sRGB')
     y_coef = [1/3, 1/3, 1/3];
     cbcr_coef = [1, 1];
 elseif strcmpi(space, 'AdobeRGB') || strcmpi(space, 'ARGB')
+    name = 'argb';
     pri_xy = [0.6400, 0.3300;
         0.2100, 0.7100;
         0.1500, 0.0600];
@@ -39,6 +41,7 @@ elseif strcmpi(space, 'AdobeRGB') || strcmpi(space, 'ARGB')
     y_coef = [1/3, 1/3, 1/3];
     cbcr_coef = [1, 1];
 elseif strcmpi(space, '709')
+    name = '709';
     pri_xy = [0.64, 0.33;
         0.3, 0.6;
         0.15, 0.06];
@@ -50,6 +53,7 @@ elseif strcmpi(space, '709')
     y_coef = [0.2126, 0.7152, 0.0722];
     cbcr_coef = [1.8556, 1.5748];
 elseif strcmpi(space, '2020')
+    name = '2020';
     pri_xy = [0.708, 0.292;
         0.170, 0.797;
         0.131, 0.046];
@@ -64,6 +68,7 @@ else
     warning('Input color space %d cannot recognize! Use default sRGB!', space);
 end
 
+pram.short_name = name;
 pram.w = internal.get_white_point(w_name);
 pram.w_name = w_name;
 pram.rgb = pri_xy;
