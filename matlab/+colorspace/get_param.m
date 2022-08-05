@@ -34,6 +34,24 @@ elseif strcmpi(space, 'AdobeRGB') || strcmpi(space, 'ARGB')
     a = 0;
     b = 0;
     k = 0;
+elseif strcmpi(space, '709')
+    pri_xy = [0.64, 0.33;
+        0.3, 0.6;
+        0.15, 0.06];
+    w_name = 'D65';
+    g = 1 / 0.45;
+    a = 0.099;
+    b = 0.018;
+    k = 4.5;
+elseif strcmpi(space, '2020')
+    pri_xy = [0.708, 0.292;
+        0.170, 0.797;
+        0.131, 0.046];
+    w_name = 'D65';
+    g = 1 / 0.45;
+    a = 0.099297;
+    b = 0.018053;
+    k = 4.5;
 else
     warning('Input color space %d cannot recognize! Use default sRGB!', space);
 end
