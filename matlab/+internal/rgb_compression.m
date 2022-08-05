@@ -11,7 +11,7 @@ function rgb = rgb_compression(rgb, varargin)
 % INPUT
 %   rgb:                n*3 matrix. Each row represents a color.
 %   cs_name:            A string for colorspace name. Default is 'sRGB'.
-%                       See internal.rgb_name_validator for detail.
+%                       See internal.cs_name_validator for detail.
 %   param:              A struct returned by colorspace.get_param.
 %   method:             Method used for adjustment. Default is 'Greying'.
 %                       See internal.rgb_compression_validator
@@ -20,7 +20,7 @@ function rgb = rgb_compression(rgb, varargin)
 
 p = inputParser;
 p.addRequired('rgb', @(x) validateattributes(x, {'numeric'}, {'2d', 'ncols', 3}));
-p.addOptional('param', 'sRGB', @internal.rgb_param_validator);
+p.addOptional('param', 'sRGB', @internal.cs_param_validator);
 p.addOptional('method', 'Greying', @internal.rgb_compression_validator);
 p.addParameter('Linear', true, @(x) islogical(x) && isscalar(x));
 p.parse(rgb, varargin{:});

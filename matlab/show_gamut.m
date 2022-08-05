@@ -7,7 +7,7 @@ function show_gamut(rgb_gamut, varargin)
 %   show_gamut(..., Name, Value...);    % Set some parameters
 % INPUT
 %   rgb_gamut:          A string for RGB gamut name.
-%                       See internal.rgb_name_validator for detail.
+%                       See internal.cs_name_validator for detail.
 %   space:              A string for the space in which gamut will be display.
 % PARAMETER
 %   'Fill':             true | false. Default is false. Whether to fill the gamut or
@@ -16,7 +16,7 @@ function show_gamut(rgb_gamut, varargin)
 %                       the RGB gamut
 
 p = inputParser;
-p.addRequired('rgb_gamut', @internal.rgb_name_validator);
+p.addRequired('rgb_gamut', @internal.cs_name_validator);
 p.addOptional('space', 'Lab', @(x) ischar(x) && (strcmpi(x, 'Lab') || strcmpi(x, 'ICtCp')));
 p.addParameter('Fill', false, @(x) islogical(x) && isscalar(x));
 p.addParameter('Vertex', false, @(x) islogical(x) && isscalar(x));

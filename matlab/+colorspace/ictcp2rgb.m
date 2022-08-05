@@ -19,7 +19,7 @@ function rgb = ictcp2rgb(ictcp, varargin)
 
 p = inputParser;
 p.addRequired('ictcp', @(x) validateattributes(x, {'numeric'}, {'2d', 'ncols', 3}));
-p.addOptional('param', 'sRGB', @internal.rgb_param_validator);
+p.addOptional('param', 'sRGB', @internal.cs_param_validator);
 p.addParameter('Scale', 100, @(x) validateattributes(x, {'numeric'}, {'scalar'}));
 p.addParameter('Linear', false, @(x) validateattributes(x, {'logical'}, {'scalar'}));
 p.parse(ictcp, varargin{:});

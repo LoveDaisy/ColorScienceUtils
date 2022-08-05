@@ -9,14 +9,14 @@ function rgb = xyz2rgb(xyz, varargin)
 % INPUT
 %   xyz:            n*3 matrix, each row represents a color of XYZ.
 %   cs_name:        A string for colorspace name. Default is 'sRGB'.
-%                   See internal.rgb_name_validator for detail.
+%                   See internal.cs_name_validator for detail.
 %   param:          A struct returned by colorspace.get_param.
 %   method:         A string for RGB adjusting method. Default is 'Greying'.
 %                   See internal.rgb_compression_validator for detail.
 
 p = inputParser;
 p.addRequired('xyz', @(x) validateattributes(x, {'numeric'}, {'2d', 'ncols', 3}));
-p.addOptional('param', 'sRGB', @internal.rgb_param_validator);
+p.addOptional('param', 'sRGB', @internal.cs_param_validator);
 p.addOptional('method', 'clip', @internal.rgb_compression_validator);
 p.parse(xyz, varargin{:});
 
