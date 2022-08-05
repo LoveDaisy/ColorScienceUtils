@@ -14,7 +14,7 @@ function m = xyz_rgb_mat(varargin)
 %                   are all n*3 matrix, and each row represents a color.
 
 p = inputParser;
-p.addOptional('param', 'sRGB', @internal.cs_validator);
+p.addOptional('param', 'sRGB', @internal.cs_param_validator);
 p.parse(varargin{:});
 
 if ischar(p.Results.param)

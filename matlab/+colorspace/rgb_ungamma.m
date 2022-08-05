@@ -3,18 +3,18 @@ function rgb_lin = rgb_ungamma(rgb, varargin)
 %   Covert RGB data from nonlinear RGB to linear RGB.
 % SYNTAX
 %   rgb_lin = rgb_gamma(rgb);
-%   rgb_lin = rgb_gamma(rgb, 'sRGB');
+%   rgb_lin = rgb_gamma(rgb, cs_name);
 %   rgb_lin = rgb_gamma(rgb, param);
 % INPUT
-%   rgb:                n*3 matrix, each row represents a color.
+%   rgb:                Any shape matrix. Non linear signal.
 %   cs_name:            A string of colorspace name. See internal.cs_name_validator for detail.
 %   param:              A struct from colorspace.get_param;
 % OUTPUT
-%   rgb_lin:            n*3 matrix, linear color.
+%   rgb_lin:            The same shape to input rgb.
 
 p = inputParser;
-p.addRequired('rgb', @(x) validateattributes(x, {'numeric'}, {'2d', 'ncols', 3}));
-p.addOptional('param', 'sRGB', @internal.cs_validator);
+p.addRequired('rgb', @(x) isnumeric(x));
+p.addOptional('param', 'sRGB', @internal.cs_param_validator);
 p.parse(rgb, varargin{:});
 
 if ischar(p.Results.param)

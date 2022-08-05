@@ -16,7 +16,7 @@ rgb_img = reshape(rgb, [length(wl), ev_num, 3]);
 rgb_img = permute(rgb_img, [2, 1, 3]);
 
 %%
-yi = 301;
+[~, yi] = min(abs(ev_store - (-0.5)));
 
 fig1 = figure(1); clf;
 set(gcf, 'Position', [200, 20, 1000, 540]);

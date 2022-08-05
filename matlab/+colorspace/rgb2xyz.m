@@ -15,7 +15,7 @@ function xyz = rgb2xyz(rgb, varargin)
 
 p = inputParser;
 p.addRequired('xyz', @(x) validateattributes(x, {'numeric'}, {'2d', 'ncols', 3}));
-p.addOptional('param', 'sRGB', @internal.cs_validator);
+p.addOptional('param', 'sRGB', @internal.cs_param_validator);
 p.parse(rgb, varargin{:});
 
 if ischar(p.Results.param)
