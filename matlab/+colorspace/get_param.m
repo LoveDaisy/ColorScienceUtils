@@ -3,7 +3,7 @@ function pram = get_param(space)
 %   Get colorspace prameters, including xy-coordinate of R, G, B, and white point,
 %   and gamma, etc.
 % INPUT
-%   space:      The colorspace name. See internal.cs_name_validator for detail.
+%   space:      The colorspace name. See colorspace.util.cs_name_validator for detail.
 % OUTPUT
 %   param:       A struct containing fields as following:
 %               .w:         1*3 vector, white point, XYZ coordinate.
@@ -13,7 +13,7 @@ function pram = get_param(space)
 %                           See colorspace.rgb_gamma & colorspace.rgb_ungamma for detail.
 
 p = inputParser;
-p.addRequired('space', @internal.cs_name_validator);
+p.addRequired('space', @colorspace.util.cs_name_validator);
 p.parse(space);
 
 if strcmpi(space, 'sRGB')
@@ -69,7 +69,7 @@ else
 end
 
 pram.short_name = name;
-pram.w = internal.get_white_point(w_name);
+pram.w = colorspace.util.get_white_point(w_name);
 pram.w_name = w_name;
 pram.rgb = pri_xy;
 pram.tsf = [a, b, g, k];

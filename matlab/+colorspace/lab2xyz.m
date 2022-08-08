@@ -12,10 +12,10 @@ p = inputParser;
 p.addRequired('lab', @(x) validateattributes(x, {'numeric'}, {'2d', 'ncols', 3}));
 p.parse(lab);
 
-w = internal.get_white_point('D65');
+w = colorspace.util.get_white_point('D65');
 lab = lab ./ [1.16, 5/5.12, 2/5.12];
 xyz = zeros(size(lab));
-xyz(:, 1) = w(1) * internal.lab_inverse_transfer(lab(:, 1) + 0.16 / 1.16 + lab(:, 2));
-xyz(:, 2) = w(2) * internal.lab_inverse_transfer(lab(:, 1) + 0.16 / 1.16);
-xyz(:, 3) = w(3) * internal.lab_inverse_transfer(lab(:, 1) + 0.16 / 1.16 - lab(:, 3));
+xyz(:, 1) = w(1) * colorspace.util.lab_inverse_transfer(lab(:, 1) + 0.16 / 1.16 + lab(:, 2));
+xyz(:, 2) = w(2) * colorspace.util.lab_inverse_transfer(lab(:, 1) + 0.16 / 1.16);
+xyz(:, 3) = w(3) * colorspace.util.lab_inverse_transfer(lab(:, 1) + 0.16 / 1.16 - lab(:, 3));
 end

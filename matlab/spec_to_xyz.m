@@ -23,7 +23,7 @@ p.addParameter('Mixed', true, @(x) validateattributes(x, {'logical'}, {'scalar'}
 p.addParameter('Y', 1, @(x) validateattributes(x, {'numeric'}, {'scalar'}));
 p.parse(spec, varargin{:});
 
-cmf = internal.xyz_cmf();
+cmf = colorspace.util.xyz_cmf();
 
 if p.Results.Mixed
     spd = interp1(spec(:, 1), spec(:, 2), cmf(:, 1), 'linear', 0);

@@ -17,5 +17,5 @@ m3 = [2048, 2048, 0;
     6610, -13613, 7003;
     17933, -17390, -543]' / 4096;       % lms to ictcp matrix, campatibale for PQ transfer
 
-xyz = internal.pq_eotf(ictcp / m3) / m2;
+xyz = colorspace.util.pq_eotf(ictcp / m3) / m2;
 end

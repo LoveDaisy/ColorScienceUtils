@@ -8,14 +8,14 @@ function xyz = rgb2xyz(rgb, varargin)
 % INPUT
 %   rgb:            n*3 matrix, each row represents a color.
 %   cs_name:        A string for colorspace name. Default is 'sRGB'.
-%                   See internal.cs_name_validator for detail.
+%                   See colorspace.util.cs_name_validator for detail.
 %   param:          A struct returned from colorspace.get_param.
 % OUTPUT
 %   xyz:            n*3 matrix for XYZ data.
 
 p = inputParser;
 p.addRequired('xyz', @(x) validateattributes(x, {'numeric'}, {'2d', 'ncols', 3}));
-p.addOptional('param', 'sRGB', @internal.cs_param_validator);
+p.addOptional('param', 'sRGB', @colorspace.util.cs_param_validator);
 p.parse(rgb, varargin{:});
 
 if ischar(p.Results.param)

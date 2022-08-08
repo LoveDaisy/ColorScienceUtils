@@ -16,8 +16,8 @@ function rgb = rgb2rgb(rgb, varargin)
 
 p = inputParser;
 p.addRequired('rgb', @(x) validateattributes(x, {'numeric'}, {'2d', 'ncols', 3}));
-p.addOptional('from', 'sRGB', @internal.cs_param_validator);
-p.addOptional('to', 'sRGB', @internal.cs_param_validator);
+p.addOptional('from', 'sRGB', @colorspace.util.cs_param_validator);
+p.addOptional('to', 'sRGB', @colorspace.util.cs_param_validator);
 p.parse(rgb, varargin{:});
 
 if ischar(p.Results.from)

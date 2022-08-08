@@ -7,14 +7,14 @@ function rgb_lin = rgb_ungamma(rgb, varargin)
 %   rgb_lin = rgb_gamma(rgb, param);
 % INPUT
 %   rgb:                Any shape matrix. Non linear signal.
-%   cs_name:            A string of colorspace name. See internal.cs_name_validator for detail.
+%   cs_name:            A string of colorspace name. See colorspace.util.cs_name_validator for detail.
 %   param:              A struct from colorspace.get_param;
 % OUTPUT
 %   rgb_lin:            The same shape to input rgb.
 
 p = inputParser;
 p.addRequired('rgb', @(x) isnumeric(x));
-p.addOptional('param', 'sRGB', @internal.cs_param_validator);
+p.addOptional('param', 'sRGB', @colorspace.util.cs_param_validator);
 p.parse(rgb, varargin{:});
 
 if ischar(p.Results.param)
