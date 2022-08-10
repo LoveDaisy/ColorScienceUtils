@@ -11,8 +11,7 @@ function xyz = ictcp2xyz(ictcp)
 input_size = size(ictcp);
 
 p = inputParser;
-p.addRequired('ictcp', @(x) isnumeric(x) && (length(size(x)) == 2 && size(x, 2) == 3 || ...
-    (length(size(x)) == 3 && size(x, 3) == 3)));
+p.addRequired('ictcp', @colorspace.util.image_shape_validator);
 p.parse(ictcp);
 
 m2 = colorspace.xyz_lms_mat();          % xyz to lms matrix

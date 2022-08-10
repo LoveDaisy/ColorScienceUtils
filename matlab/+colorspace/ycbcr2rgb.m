@@ -22,8 +22,7 @@ function rgb = ycbcr2rgb(yuv, varargin)
 input_size = size(yuv);
 
 p = inputParser;
-p.addRequired('yuv', @(x) isnumeric(x) && ((length(size(x)) == 2 && size(x, 2) == 3) || ...
-    (length(size(x)) == 3 && size(x, 3) == 3)));
+p.addRequired('yuv', @colorspace.util.image_shape_validator);
 p.addOptional('yuv_param', '709', @colorspace.util.cs_param_validator);
 p.addOptional('rgb_param', 'sRGB', @colorspace.util.cs_param_validator);
 p.parse(yuv, varargin{:});

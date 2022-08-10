@@ -19,8 +19,7 @@ function rgb = xyz2rgb(xyz, varargin)
 input_size = size(xyz);
 
 p = inputParser;
-p.addRequired('xyz', @(x) isnumeric(x) && ((length(size(x)) == 2 && size(x, 2) == 3) || ...
-    (length(size(x)) == 3 && size(x, 3) == 3)));
+p.addRequired('xyz', @colorspace.util.image_shape_validator);
 p.addOptional('param', 'sRGB', @colorspace.util.cs_param_validator);
 p.addOptional('method', 'clip', @colorspace.util.rgb_compression_validator);
 p.parse(xyz, varargin{:});

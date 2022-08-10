@@ -16,8 +16,7 @@ function rgb = rgb2rgb(rgb, varargin)
 %   rgb:            The same shape to input rgb.
 
 p = inputParser;
-p.addRequired('rgb', @(x) isnumeric(x) && ((length(size(x)) == 2 && size(x, 2) == 3) || ...
-    (length(size(x)) == 3 && size(x, 3) == 3)));
+p.addRequired('rgb', @colorspace.util.image_shape_validator);
 p.addOptional('from', 'sRGB', @colorspace.util.cs_param_validator);
 p.addOptional('to', 'sRGB', @colorspace.util.cs_param_validator);
 p.parse(rgb, varargin{:});

@@ -11,8 +11,7 @@ function lab = xyz2lab(xyz)
 input_size = size(xyz);
 
 p = inputParser;
-p.addRequired('xyz', @(x) isnumeric(x) && ((length(size(x)) == 2 && size(x, 2) == 3) || ...
-  (length(size(x)) == 3 && size(x, 3) == 3)));
+p.addRequired('xyz', @colorspace.util.image_shape_validator);
 p.parse(xyz);
 
 w = colorspace.util.get_white_point('D65');

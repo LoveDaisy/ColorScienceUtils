@@ -18,8 +18,7 @@ function rgb = ictcp2rgb(ictcp, varargin)
 %   rgb:            The same shape to input ictcp.
 
 p = inputParser;
-p.addRequired('ictcp', @(x) isnumeric(x) && ((length(size(x)) == 2 && size(x, 2) == 3 || ...
-    (length(size(x)) == 3 && size(x, 3) == 3))));
+p.addRequired('ictcp', @colorspace.util.image_shape_validator);
 p.addOptional('param', 'sRGB', @colorspace.util.cs_param_validator);
 p.addParameter('Scale', 100, @(x) validateattributes(x, {'numeric'}, {'scalar'}));
 p.addParameter('Linear', false, @(x) validateattributes(x, {'logical'}, {'scalar'}));
