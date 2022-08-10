@@ -28,16 +28,21 @@ hold on;
 
 if ~isempty(p.Results.xy)
     grid = 0.0025;
-    xy_grid = int32(round(p.Results.xy / grid));
-    [xy_grid, ~, ic] = unique(xy_grid, 'rows');
-    xy_grid = double(xy_grid) * grid;
-    cnt = accumarray(ic, 1);
+    hist_img_x = 0:grid:0.8;
+    hist_img_y = 0:grid:0.9;
+    hist_img_size = [length(hist_img_y), length(hist_img_x)];
+    idx = sub2ind(hist_img_size, floor(p.Results.xy(:, 2) / grid) + 1, floor(p.Results.xy(:, 1) / grid) + 1);
+    cnt = accumarray(idx, 1, [prod(hist_img_size), 1]);
     k = (cnt / max(cnt)).^0.45;
+    
+    [xx, yy] = meshgrid(hist_img_x, hist_img_y);
+    xy_grid = [xx(:), yy(:)];
     
     xyz = [xy_grid, 1 - sum(xy_grid, 2)] ./ xy_grid(:, 2) .* k * 1.2;
     color = max(colorspace.xyz2rgb(xyz), p.Results.background);
+    color = reshape(color, [hist_img_size, 3]);
     
-    scatter(xy_grid(:, 1), xy_grid(:, 2), 3, color, 'fill');
+    imagesc(hist_img_x, hist_img_y, color);
 end
 
 if p.Results.linewidth > 0
