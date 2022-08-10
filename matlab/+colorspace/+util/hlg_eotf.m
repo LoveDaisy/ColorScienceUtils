@@ -18,6 +18,6 @@ Lw = 1000;
 gamma = 1.2;
 beta = sqrt(3 * (Lb / Lw) ^ (1 / gamma));
 
-o = internal.hlg_inverse_oetf(max(0, (1 - beta) * e + beta));
-o = internal.hlg_ootf(o);
+o = colorspace.util.hlg_inverse_oetf(max(0, (1 - beta) * e + beta));
+o = colorspace.util.hlg_ootf(o);
 end

@@ -11,17 +11,17 @@ function rgb = rgb_compression(rgb, varargin)
 % INPUT
 %   rgb:                n*3 matrix. Each row represents a color.
 %   cs_name:            A string for colorspace name. Default is 'sRGB'.
-%                       See internal.cs_name_validator for detail.
+%                       See colorspace.util.cs_name_validator for detail.
 %   param:              A struct returned by colorspace.get_param.
 %   method:             Method used for adjustment. Default is 'Greying'.
-%                       See internal.rgb_compression_validator
+%                       See colorspace.util.rgb_compression_validator
 % PARAMETER
 %   'Linear':           {true} | false. Whether input RGB is in linear space.
 
 p = inputParser;
 p.addRequired('rgb', @(x) validateattributes(x, {'numeric'}, {'2d', 'ncols', 3}));
-p.addOptional('param', 'sRGB', @internal.cs_param_validator);
-p.addOptional('method', 'Greying', @internal.rgb_compression_validator);
+p.addOptional('param', 'sRGB', @colorspace.util.cs_param_validator);
+p.addOptional('method', 'Greying', @colorspace.util.rgb_compression_validator);
 p.addParameter('Linear', true, @(x) islogical(x) && isscalar(x));
 p.parse(rgb, varargin{:});
 
@@ -39,28 +39,29 @@ switch lower(p.Results.method)
         return
 end
 
+idx = sum(rgb < 0 | rgb > 1, 2) > 0;
 if ~p.Results.Linear
-    rgb = colorspace.rgb_ungamma(rgb, param);
+    rgb(idx, :) = colorspace.rgb_ungamma(rgb(idx, :), param);
 end
 switch lower(p.Results.method)
     case 'desat'
-        rgb = desat(rgb);
+        rgb(idx, :) = desat(rgb(idx, :));
     case 'greying'
-        rgb = greying_xyz(rgb, param);
+        rgb(idx, :) = greying_xyz(rgb(idx, :), param);
     case 'greyingxyz'
-        rgb = greying_xyz(rgb, param);
+        rgb(idx, :) = greying_xyz(rgb(idx, :), param);
     case 'greyinglab'
-        rgb = greying_lab(rgb, param);
+        rgb(idx, :) = greying_lab(rgb(idx, :), param);
     case 'greyingictcp'
-        rgb = greying_ictcp(rgb, param);
+        rgb(idx, :) = greying_ictcp(rgb(idx, :), param);
     otherwise
         warning('Cannot recognize method! Use clip as default!');
-        rgb = clip(rgb);
+        rgb(idx, :) = clip(rgb(idx, :));
 end
 if ~p.Results.Linear
-    rgb = colorspace.rgb_gamma(rgb, param);
+    rgb(idx, :) = colorspace.rgb_gamma(rgb(idx, :), param);
 end
-rgb = min(max(rgb, 0), 1);
+rgb = clip(rgb);
 end
 
 
@@ -115,13 +116,13 @@ lab_E = [lab(:, 1), zeros(num, 2)];
 % Binary search for a0
 fun = @(a, idx) min(colorspace.lab2xyz(a(idx) .* lab(idx, :) + ...
     (1 - a(idx)) .* lab_E(idx, :)) * m, [], 2);
-a0 = internal.solve_equation_binary(fun, ...
+a0 = colorspace.util.solve_equation_binary(fun, ...
     zeros(num, 1), zeros(num, 1), ones(num, 1));
 
 % Binary search for a1
 fun = @(a, idx) max(colorspace.lab2xyz(a(idx) .* lab(idx, :) + ...
     (1 - a(idx)) .* lab_E(idx, :)) * m, [], 2);
-a1 = internal.solve_equation_binary(fun, ...
+a1 = colorspace.util.solve_equation_binary(fun, ...
     ones(num, 1), zeros(num, 1), ones(num, 1));
 
 a = min(a0, a1);
@@ -143,16 +144,16 @@ ictcp_E = [ictcp(:, 1), zeros(num, 2)];
 % Binary search for a0
 fun = @(a, idx) min(colorspace.ictcp2xyz(a(idx) .* ictcp(idx, :) + ...
     (1 - a(idx)) .* ictcp_E(idx, :)) * m / scale, [], 2);
-a0 = internal.solve_equation_binary(fun, zeros(num, 1), zeros(num, 1), ones(num, 1));
+a0 = colorspace.util.solve_equation_binary(fun, zeros(num, 1), zeros(num, 1), ones(num, 1));
 
 % Binary search for a1
 fun = @(a, idx) max(colorspace.ictcp2xyz(a(idx) .* ictcp(idx, :) + ...
     (1 - a(idx)) .* ictcp_E(idx, :)) * m / scale, [], 2);
-a1 = internal.solve_equation_binary(fun, ones(num, 1), zeros(num, 1), ones(num, 1));
+a1 = colorspace.util.solve_equation_binary(fun, ones(num, 1), zeros(num, 1), ones(num, 1));
 
 a = min(a0, a1);
 
 ictcp = a .* ictcp + (1 - a) .* ictcp_E;
-ictcp(ictcp(:, 1) >= internal.pq_inverse_eotf(scale), 2:3) = 0;
+ictcp(ictcp(:, 1) >= colorspace.util.pq_inverse_eotf(scale), 2:3) = 0;
 rgb_lin = colorspace.ictcp2xyz(ictcp) * m / scale;
 end

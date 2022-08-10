@@ -6,16 +6,18 @@ function xyz = rgb2xyz(rgb, varargin)
 %   xyz = rgb2xyz(rgb, cs_name);
 %   xyz = rgb2xyz(rgb, param);
 % INPUT
-%   rgb:            n*3 matrix, each row represents a color.
+%   rgb:            n*3 matrix, each row represents a color; or m*n*3 array for 3-channel image.
 %   cs_name:        A string for colorspace name. Default is 'sRGB'.
-%                   See internal.cs_name_validator for detail.
+%                   See colorspace.util.cs_name_validator for detail.
 %   param:          A struct returned from colorspace.get_param.
 % OUTPUT
-%   xyz:            n*3 matrix for XYZ data.
+%   xyz:            The same shape to input rgb.
+
+input_size = size(rgb);
 
 p = inputParser;
-p.addRequired('xyz', @(x) validateattributes(x, {'numeric'}, {'2d', 'ncols', 3}));
-p.addOptional('param', 'sRGB', @internal.cs_param_validator);
+p.addRequired('xyz', @colorspace.util.image_shape_validator);
+p.addOptional('param', 'sRGB', @colorspace.util.cs_param_validator);
 p.parse(rgb, varargin{:});
 
 if ischar(p.Results.param)
@@ -26,5 +28,6 @@ end
 
 mat = colorspace.xyz_rgb_mat(param);
 rgb_lin = colorspace.rgb_ungamma(rgb, param);
-xyz = rgb_lin / mat;
+xyz = reshape(rgb_lin, [], 3) / mat;
+xyz = reshape(xyz, input_size);
 end

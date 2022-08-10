@@ -7,17 +7,21 @@ function rgb = xyz2rgb(xyz, varargin)
 %   rgb = xyz2rgb(xyz, param);
 %   rgb = xyz2rgb(..., method);
 % INPUT
-%   xyz:            n*3 matrix, each row represents a color of XYZ.
+%   xyz:            n*3 matrix, each row represents a color of XYZ; or m*n*3 array for 3-channel image.
 %   cs_name:        A string for colorspace name. Default is 'sRGB'.
-%                   See internal.cs_name_validator for detail.
+%                   See colorspace.util.cs_name_validator for detail.
 %   param:          A struct returned by colorspace.get_param.
 %   method:         A string for RGB adjusting method. Default is 'Greying'.
-%                   See internal.rgb_compression_validator for detail.
+%                   See colorspace.util.rgb_compression_validator for detail.
+% OUTPUT
+%   rgb:            The same shape to input xyz.
+
+input_size = size(xyz);
 
 p = inputParser;
-p.addRequired('xyz', @(x) validateattributes(x, {'numeric'}, {'2d', 'ncols', 3}));
-p.addOptional('param', 'sRGB', @internal.cs_param_validator);
-p.addOptional('method', 'clip', @internal.rgb_compression_validator);
+p.addRequired('xyz', @colorspace.util.image_shape_validator);
+p.addOptional('param', 'sRGB', @colorspace.util.cs_param_validator);
+p.addOptional('method', 'clip', @colorspace.util.rgb_compression_validator);
 p.parse(xyz, varargin{:});
 
 if ischar(p.Results.param)
@@ -27,7 +31,8 @@ else
 end
 
 mat = colorspace.xyz_rgb_mat(param);
-rgb_lin = xyz * mat;
-rgb_lin = internal.rgb_compression(rgb_lin, param, p.Results.method, 'Linear', true);
+rgb_lin = reshape(xyz, [], 3) * mat;
+rgb_lin = colorspace.util.rgb_compression(rgb_lin, param, p.Results.method, 'Linear', true);
 rgb = colorspace.rgb_gamma(rgb_lin, param);
+rgb = reshape(rgb, input_size);
 end

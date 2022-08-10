@@ -7,20 +7,26 @@ function rgb = rgb_gamma(rgb_lin, varargin)
 %   rgb = rgb_gamma(rgb_lin, param);
 % INPUT
 %   rgb:                Any shape matrix.
-%   cs_name:            A string of colorspace name. See internal.cs_name_validator for detail.
+%   cs_name:            A string of colorspace name. See colorspace.util.cs_name_validator for detail.
 %   param:              A struct from colorspace.get_param;
 % OUTPUT
 %   rgb:                The same shape of input rgb_lin
 
 p = inputParser;
 p.addRequired('rgb', @(x) isnumeric(x));
-p.addOptional('param', 'sRGB', @internal.cs_param_validator);
+p.addOptional('param', 'sRGB', @colorspace.util.cs_param_validator);
 p.parse(rgb_lin, varargin{:});
 
 if ischar(p.Results.param)
     param = colorspace.get_param(p.Results.param);
 else
     param = p.Results.param;
+end
+
+% For linear transfer characteristics, do nothing.
+if abs(param.tsf(3) - 1) < 1e-4 && abs(param.tsf(4) - 1) < 1e-4
+    rgb = rgb_lin;
+    return;
 end
 
 g = 1 / param.tsf(3);
