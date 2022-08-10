@@ -18,9 +18,6 @@ p.parse(space);
 
 if strcmpi(space, 'sRGB')
     name = 'srgb';
-    pri_xy = [0.6400, 0.3300;
-        0.3000, 0.6000;
-        0.1500, 0.0600];
     w_name = 'D65';
     g = 2.4;
     a = 0.055;
@@ -30,9 +27,6 @@ if strcmpi(space, 'sRGB')
     cbcr_coef = [1, 1];
 elseif strcmpi(space, 'AdobeRGB') || strcmpi(space, 'ARGB')
     name = 'argb';
-    pri_xy = [0.6400, 0.3300;
-        0.2100, 0.7100;
-        0.1500, 0.0600];
     w_name = 'D65';
     g = 2.2;
     a = 0;
@@ -42,9 +36,6 @@ elseif strcmpi(space, 'AdobeRGB') || strcmpi(space, 'ARGB')
     cbcr_coef = [1, 1];
 elseif strcmpi(space, '709')
     name = '709';
-    pri_xy = [0.64, 0.33;
-        0.3, 0.6;
-        0.15, 0.06];
     w_name = 'D65';
     g = 1 / 0.45;
     a = 0.099;
@@ -54,9 +45,24 @@ elseif strcmpi(space, '709')
     cbcr_coef = [1.8556, 1.5748];
 elseif strcmpi(space, '2020')
     name = '2020';
-    pri_xy = [0.708, 0.292;
-        0.170, 0.797;
-        0.131, 0.046];
+    w_name = 'D65';
+    g = 1 / 0.45;
+    a = 0.099297;
+    b = 0.018053;
+    k = 4.5;
+    y_coef = [0.2627, 0.6780, 0.0593];
+    cbcr_coef = [1.8814, 1.4746];
+elseif strcmpi(space, 'p3d65') || strcmpi(space, 'd65p3') ||strcmpi(space, 'displayp3')
+    name = 'p3d65';
+    w_name = 'D65';
+    g = 1 / 0.45;
+    a = 0.099297;
+    b = 0.018053;
+    k = 4.5;
+    y_coef = [0.2627, 0.6780, 0.0593];
+    cbcr_coef = [1.8814, 1.4746];
+elseif strcmpi(space, 'p3dci') || strcmpi(space, 'dci3')
+    name = 'p3dci';
     w_name = 'D65';
     g = 1 / 0.45;
     a = 0.099297;
@@ -69,9 +75,9 @@ else
 end
 
 pram.short_name = name;
-pram.w = colorspace.util.get_white_point(w_name);
 pram.w_name = w_name;
-pram.rgb = pri_xy;
+pram.w = colorspace.util.get_white_point(w_name);
+pram.rgb = colorspace.util.get_primaries(name);
 pram.tsf = [a, b, g, k];
 pram.yuv = [y_coef, cbcr_coef];
 end
