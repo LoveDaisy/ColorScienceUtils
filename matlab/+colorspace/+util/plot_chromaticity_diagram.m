@@ -11,6 +11,8 @@ function plot_chromaticity_diagram(varargin)
 %   'linewidth':        A scalar. Default is 1.2.
 %   'primaries':        A string for colorspace name, or a struct of colorspace parameter. See
 %                       colorspace.util.cs_param_validator for detail. Default is empty.
+%   'pri_color':        3-elements RGB value. Default is [0.6, 0.6, 0.6]. The color for
+%                       primary vertices and boundary.
 %   'xy':               n*2 array.
 
 p = inputParser;
@@ -20,6 +22,7 @@ p.addParameter('color', 'real', @(x) ischar(x) && strcmpi(x, 'real') || ...
 p.addParameter('background', [0.1, 0.1, 0.1], @(x) isnumeric(x) && isvector(x) && length(x) == 3);
 p.addParameter('linewidth', 1.2, @isscalar);
 p.addParameter('primaries', [], @colorspace.util.cs_param_validator);
+p.addParameter('pri_color', [0.6, 0.6, 0.6], @(x) isnumeric(x) && isvector(x) && length(x) == 3);
 p.addParameter('xy', [], @(x) validateattributes(x, {'numeric'}, {'2d', 'ncols', 2}));
 p.parse(varargin{:});
 
@@ -33,7 +36,7 @@ if ~isempty(p.Results.xy)
     hist_img_size = [length(hist_img_y), length(hist_img_x)];
     idx = sub2ind(hist_img_size, floor(p.Results.xy(:, 2) / grid) + 1, floor(p.Results.xy(:, 1) / grid) + 1);
     cnt = accumarray(idx, 1, [prod(hist_img_size), 1]);
-    k = (cnt / max(cnt)).^0.45;
+    k = (cnt(:) / max(cnt(:))).^0.45;
     
     [xx, yy] = meshgrid(hist_img_x, hist_img_y);
     xy_grid = [xx(:), yy(:)];
@@ -70,7 +73,8 @@ if ~isempty(p.Results.primaries)
     else
         param = p.Results.primaries;
     end
-    plot(param.rgb(:, 1), param.rgb(:, 2), 'ws');
+    plot([param.rgb(:, 1); param.rgb(1, 1)], [param.rgb(:, 2); param.rgb(1, 2)], '-s', ...
+        'color', p.Results.pri_color);
     plot(param.w(:, 1) / sum(param.w), param.w(:, 2) / sum(param.w), 'wo');
 end
 
