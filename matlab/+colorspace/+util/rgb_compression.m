@@ -39,28 +39,29 @@ switch lower(p.Results.method)
         return
 end
 
+idx = sum(rgb < 0 | rgb > 1, 2) > 0;
 if ~p.Results.Linear
-    rgb = colorspace.rgb_ungamma(rgb, param);
+    rgb(idx, :) = colorspace.rgb_ungamma(rgb(idx, :), param);
 end
 switch lower(p.Results.method)
     case 'desat'
-        rgb = desat(rgb);
+        rgb(idx, :) = desat(rgb(idx, :));
     case 'greying'
-        rgb = greying_xyz(rgb, param);
+        rgb(idx, :) = greying_xyz(rgb(idx, :), param);
     case 'greyingxyz'
-        rgb = greying_xyz(rgb, param);
+        rgb(idx, :) = greying_xyz(rgb(idx, :), param);
     case 'greyinglab'
-        rgb = greying_lab(rgb, param);
+        rgb(idx, :) = greying_lab(rgb(idx, :), param);
     case 'greyingictcp'
-        rgb = greying_ictcp(rgb, param);
+        rgb(idx, :) = greying_ictcp(rgb(idx, :), param);
     otherwise
         warning('Cannot recognize method! Use clip as default!');
-        rgb = clip(rgb);
+        rgb(idx, :) = clip(rgb(idx, :));
 end
 if ~p.Results.Linear
-    rgb = colorspace.rgb_gamma(rgb, param);
+    rgb(idx, :) = colorspace.rgb_gamma(rgb(idx, :), param);
 end
-rgb = min(max(rgb, 0), 1);
+rgb = clip(rgb);
 end
 
 

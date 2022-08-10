@@ -23,6 +23,12 @@ else
     param = p.Results.param;
 end
 
+% For linear transfer characteristics, do nothing.
+if abs(param.tsf(3) - 1) < 1e-4 && abs(param.tsf(4) - 1) < 1e-4
+    rgb = rgb_lin;
+    return;
+end
+
 g = 1 / param.tsf(3);
 a = param.tsf(1);
 x0 = param.tsf(2);
