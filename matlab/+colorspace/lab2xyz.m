@@ -4,18 +4,23 @@ function xyz = lab2xyz(lab)
 % SYNTAX
 %   xyz = lab2xyz(lab)
 % INPUT
-%   lab:            n*3 matrix, each row represents a color. L ranges between [0, 1]
+%   lab:            n*3 matrix, each row represents a color; or m*n*3 array for 3-channel image.
+%                   L ranges between [0, 1]
 % OUTPUT
-%   xyz:            n*3 matrix, each row represents a color.
+%   xyz:            The same shape to input lab.
+
+input_size = size(lab);
 
 p = inputParser;
-p.addRequired('lab', @(x) validateattributes(x, {'numeric'}, {'2d', 'ncols', 3}));
+p.addRequired('lab', @(x) isnumeric(x) && ((length(size(x)) == 2 && size(x, 2) == 3) || ...
+  (length(size(x)) == 3 && size(x, 3) == 3)));
 p.parse(lab);
 
 w = colorspace.util.get_white_point('D65');
-lab = lab ./ [1.16, 5/5.12, 2/5.12];
+lab = reshape(lab, [], 3) ./ [1.16, 5/5.12, 2/5.12];
 xyz = zeros(size(lab));
 xyz(:, 1) = w(1) * colorspace.util.lab_inverse_transfer(lab(:, 1) + 0.16 / 1.16 + lab(:, 2));
 xyz(:, 2) = w(2) * colorspace.util.lab_inverse_transfer(lab(:, 1) + 0.16 / 1.16);
 xyz(:, 3) = w(3) * colorspace.util.lab_inverse_transfer(lab(:, 1) + 0.16 / 1.16 - lab(:, 3));
+xyz = reshape(xyz, input_size);
 end

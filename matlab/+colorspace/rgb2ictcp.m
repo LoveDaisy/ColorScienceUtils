@@ -7,7 +7,7 @@ function ictcp = rgb2ictcp(rgb, varargin)
 %   ictcp = rgb2ictcp(rgb, param);
 %   ictcp = rgb2ictcp(..., Name, Value...);
 % INPUT
-%   rgb:            n*3 matrix, each row represents a color.
+%   rgb:            n*3 matrix, each row represents a color; or m*n*3 for 3-channel image.
 %   space:          A string for RGB colorspace name.
 %   param:          A struct returned by colorspace.get_param.
 % PARAMETER
@@ -15,10 +15,11 @@ function ictcp = rgb2ictcp(rgb, varargin)
 %                   Scale = s means white [1, 1, 1] in linear space should be s cd/m^2 in reality.
 %   'Linear':       true | false. Default is false.
 % OUTPUT
-%   ictcp:          n*3 matrix, each row represents a color.
+%   ictcp:          The same shape to input rgb.
 
 p = inputParser;
-p.addRequired('rgb', @(x) validateattributes(x, {'numeric'}, {'2d', 'ncols', 3}));
+p.addRequired('rgb', @(x) isnumeric(x) && ((length(size(x)) == 2 && size(x, 2) == 3) || ...
+    (length(size(x)) == 3 && size(x, 3) == 3)));
 p.addOptional('param', 'sRGB', @colorspace.util.cs_param_validator);
 p.addParameter('Scale', 100, @(x) validateattributes(x, {'numeric'}, {'scalar'}));
 p.addParameter('Linear', false, @(x) validateattributes(x, {'logical'}, {'scalar'}));

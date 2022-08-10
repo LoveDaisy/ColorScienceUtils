@@ -9,7 +9,7 @@ function yuv = rgb2ycbcr(rgb, varargin)
 %   yuv = rgb2ycbcr(..., target_yuv_name)
 %   yuv = rgb2ycbcr(..., target_yuv_param)
 % INPUT
-%   rgb:                n*3 array, each row represents a color.
+%   rgb:                n*3 array, each row represents a color; or m*n*3 array for 3-channel image.
 %   rgb_name:           A string for colorspace name. Default is 'sRGB'.
 %                       See colorspace.util.cs_name_validator for detail.
 %   rgb_param:          A struct returned from colorspace.get_param.
@@ -17,10 +17,13 @@ function yuv = rgb2ycbcr(rgb, varargin)
 %                       See colorspace.util.cs_name_validator for detail.
 %   target_yuv_param:   A struct returned from colorspace.get_param.
 % OUTPUT
-%   yuv:                n*3 array, each row represents a color. uv components are in range [-0.5, 0.5]
+%   yuv:                The smae shape to input rgb. uv components are in range [-0.5, 0.5]
+
+input_size = size(rgb);
 
 p = inputParser;
-p.addRequired('rgb', @(x) validateattributes(x, {'numeric'}, {'2d', 'ncols', 3}));
+p.addRequired('rgb', @(x) isnumeric(x) && ((length(size(x)) == 2 && size(x, 2) == 3) || ...
+    (length(size(x)) == 3 && size(x, 3) == 3)));
 p.addOptional('rgb_param', 'sRGB', @colorspace.util.cs_param_validator);
 p.addOptional('yuv_param', '709', @colorspace.util.cs_param_validator);
 p.parse(rgb, varargin{:});
@@ -46,5 +49,6 @@ rgb = colorspace.rgb2rgb(rgb, rgb_param, yuv_param);
 % Construct the matrix:
 %   yuv = rgb * m;
 m = [coef_y; ([0, 0, 1] - coef_y) / coef_cb; ([1, 0, 0] - coef_y) / coef_cr]';
-yuv = rgb * m;
+yuv = reshape(rgb, [], 3) * m;
+yuv = reshape(yuv, input_size);
 end

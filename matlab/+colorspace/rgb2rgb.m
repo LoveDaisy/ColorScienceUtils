@@ -6,16 +6,18 @@ function rgb = rgb2rgb(rgb, varargin)
 %   rgb = rgb2rgb(rgb, from)
 %   rgb = rgb2rgb(rgb, from, to)
 % INPUT
-%   rgb:            n*3 array, each row represents a color in RGB space, range in [0, 1]
+%   rgb:            n*3 array, each row represents a color in RGB space, range in [0, 1];
+%                   or m*n*3 array for 3-channel image.
 %   from:           A string for colorspace, or a struct get from colorspace.get_param.
 %                   Default is 'sRGB'.
 %   to:             A string for colorspace, or a struct get from colorspace.get_param.
 %                   Default is 'sRGB'.
 % OUTPUT
-%   rgb:            n*3 array.
+%   rgb:            The same shape to input rgb.
 
 p = inputParser;
-p.addRequired('rgb', @(x) validateattributes(x, {'numeric'}, {'2d', 'ncols', 3}));
+p.addRequired('rgb', @(x) isnumeric(x) && ((length(size(x)) == 2 && size(x, 2) == 3) || ...
+    (length(size(x)) == 3 && size(x, 3) == 3)));
 p.addOptional('from', 'sRGB', @colorspace.util.cs_param_validator);
 p.addOptional('to', 'sRGB', @colorspace.util.cs_param_validator);
 p.parse(rgb, varargin{:});
