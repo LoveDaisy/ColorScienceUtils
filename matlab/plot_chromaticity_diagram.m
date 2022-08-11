@@ -43,7 +43,7 @@ if isempty(p.Results.xy) && p.Results.fill
 end
 
 if p.Results.linewidth > 0
-    draw_boundary(p.Resultss.lambda, p.Results.color, p.Results.linewidth);
+    draw_boundary(p.Results.lambda, p.Results.color, p.Results.linewidth);
 end
 
 if ~isempty(p.Results.primaries)
