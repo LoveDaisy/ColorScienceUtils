@@ -41,7 +41,7 @@ for i = 1:length(name_list)
 end
 end
 
-function test_rgb_back(test_case)
+function test_rgb2xyz_roundtrip(test_case)
 name_list = {'sRGB', 'ARGB'};
 tol = 1e-10;
 
