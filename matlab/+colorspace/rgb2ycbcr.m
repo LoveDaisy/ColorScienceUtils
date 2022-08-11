@@ -11,10 +11,10 @@ function yuv = rgb2ycbcr(rgb, varargin)
 % INPUT
 %   rgb:                n*3 array, each row represents a color; or m*n*3 array for 3-channel image.
 %   rgb_name:           A string for colorspace name. Default is 'sRGB'.
-%                       See colorspace.util.cs_name_validator for detail.
+%                       See colorutil.cs_name_validator for detail.
 %   rgb_param:          A struct returned from colorspace.get_param.
 %   target_yuv_name:    A string for colorspace name. Default is '709'.
-%                       See colorspace.util.cs_name_validator for detail.
+%                       See colorutil.cs_name_validator for detail.
 %   target_yuv_param:   A struct returned from colorspace.get_param.
 % OUTPUT
 %   yuv:                The smae shape to input rgb. uv components are in range [-0.5, 0.5]
@@ -22,9 +22,9 @@ function yuv = rgb2ycbcr(rgb, varargin)
 input_size = size(rgb);
 
 p = inputParser;
-p.addRequired('rgb', @colorspace.util.image_shape_validator);
-p.addOptional('rgb_param', 'sRGB', @colorspace.util.cs_param_validator);
-p.addOptional('yuv_param', '709', @colorspace.util.cs_param_validator);
+p.addRequired('rgb', @colorutil.image_shape_validator);
+p.addOptional('rgb_param', 'sRGB', @colorutil.cs_param_validator);
+p.addOptional('yuv_param', '709', @colorutil.cs_param_validator);
 p.parse(rgb, varargin{:});
 
 if ischar(p.Results.rgb_param)

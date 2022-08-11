@@ -8,7 +8,7 @@ function xyz = rgb2xyz(rgb, varargin)
 % INPUT
 %   rgb:            n*3 matrix, each row represents a color; or m*n*3 array for 3-channel image.
 %   cs_name:        A string for colorspace name. Default is 'sRGB'.
-%                   See colorspace.util.cs_name_validator for detail.
+%                   See colorutil.cs_name_validator for detail.
 %   param:          A struct returned from colorspace.get_param.
 % OUTPUT
 %   xyz:            The same shape to input rgb.
@@ -16,8 +16,8 @@ function xyz = rgb2xyz(rgb, varargin)
 input_size = size(rgb);
 
 p = inputParser;
-p.addRequired('xyz', @colorspace.util.image_shape_validator);
-p.addOptional('param', 'sRGB', @colorspace.util.cs_param_validator);
+p.addRequired('xyz', @colorutil.image_shape_validator);
+p.addOptional('param', 'sRGB', @colorutil.cs_param_validator);
 p.parse(rgb, varargin{:});
 
 if ischar(p.Results.param)

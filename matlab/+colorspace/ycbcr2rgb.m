@@ -11,10 +11,10 @@ function rgb = ycbcr2rgb(yuv, varargin)
 % INPUT
 %   yuv:                n*3 array, each row represents a color; or m*n*3 array. uv components are in range [-0.5, 0.5].
 %   yuv_name:           A string for colorspace name. Default is '709'.
-%                       See colorspace.util.cs_name_validator for detail.
+%                       See colorutil.cs_name_validator for detail.
 %   yuv_param:          A struct returned from colorspace.get_param.
 %   target_rgb_name:    A string for colorspace name. Default is 'sRGB'.
-%                       See colorspace.util.cs_name_validator for detail.
+%                       See colorutil.cs_name_validator for detail.
 %   target_rgb_param:   A struct returned from colorspace.get_param.
 % OUTPUT
 %   rgb:                Same shape to input yuv.
@@ -22,9 +22,9 @@ function rgb = ycbcr2rgb(yuv, varargin)
 input_size = size(yuv);
 
 p = inputParser;
-p.addRequired('yuv', @colorspace.util.image_shape_validator);
-p.addOptional('yuv_param', '709', @colorspace.util.cs_param_validator);
-p.addOptional('rgb_param', 'sRGB', @colorspace.util.cs_param_validator);
+p.addRequired('yuv', @colorutil.image_shape_validator);
+p.addOptional('yuv_param', '709', @colorutil.cs_param_validator);
+p.addOptional('rgb_param', 'sRGB', @colorutil.cs_param_validator);
 p.parse(yuv, varargin{:});
 
 if ischar(p.Results.yuv_param)

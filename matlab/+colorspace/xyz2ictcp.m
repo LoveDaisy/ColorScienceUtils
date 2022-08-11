@@ -11,7 +11,7 @@ function ictcp = xyz2ictcp(xyz)
 input_size = size(xyz);
 
 p = inputParser;
-p.addRequired('xyz', @colorspace.util.image_shape_validator);
+p.addRequired('xyz', @colorutil.image_shape_validator);
 p.parse(xyz);
 
 m2 = colorspace.xyz_lms_mat();          % xyz to lms matrix
@@ -19,6 +19,6 @@ m3 = [2048, 2048, 0;
     6610, -13613, 7003;
     17933, -17390, -543]' / 4096;       % lms to ictcp matrix, campatibale for PQ transfer
 
-ictcp = colorspace.util.pq_inverse_eotf(reshape(xyz, [], 3) * m2) * m3;
+ictcp = colorspace.pq_inverse_eotf(reshape(xyz, [], 3) * m2) * m3;
 ictcp = reshape(ictcp, input_size);
 end

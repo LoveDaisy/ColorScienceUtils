@@ -12,7 +12,7 @@ function plot_chromaticity_diagram(varargin)
 %   'background':       3-elements RGB value. Default is [0.1, 0.1, 0.1].
 %   'linewidth':        A scalar. Default is 1.2.
 %   'primaries':        A string for colorspace name, or a struct of colorspace parameter. See
-%                       colorspace.util.cs_param_validator for detail. Default is empty.
+%                       colorutil.cs_param_validator for detail. Default is empty.
 %   'pri_color':        3-elements RGB value. Default is [0.6, 0.6, 0.6]. The color for
 %                       primary vertices and boundary.
 %   'lambda':           row vector, the wavelength values. Default is 400:760.
@@ -23,7 +23,7 @@ p.addParameter('color', 'real', @(x) ischar(x) && strcmpi(x, 'real') || ...
     isnumeric(x) && isvector(x) && length(x) == 3);
 p.addParameter('background', [0.1, 0.1, 0.1], @(x) isnumeric(x) && isvector(x) && length(x) == 3);
 p.addParameter('linewidth', 1.2, @isscalar);
-p.addParameter('primaries', [], @colorspace.util.cs_param_validator);
+p.addParameter('primaries', [], @colorutil.cs_param_validator);
 p.addParameter('pri_color', [0.6, 0.6, 0.6], @(x) isnumeric(x) && isvector(x) && length(x) == 3);
 p.addParameter('xy', [], @(x) validateattributes(x, {'numeric'}, {'2d', 'ncols', 2}));
 p.addParameter('fill', false, @islogical);
@@ -58,14 +58,14 @@ function fill_chromaticity(background)
 % DESCRIPTION
 %   It fills the diagram with approximate RGB color.
 
-w0 = colorspace.util.get_white_point('D65');
+w0 = colorspace.get_white_point('D65');
 
 grid = 0.0005;
 img_x = 0:grid:0.8;
 img_y = 0:grid:0.9;
 img_size = [length(img_y), length(img_x)];
 
-cmf = colorspace.util.xyz_cmf();
+cmf = colorspace.xyz_cmf();
 xy0 = cmf(:, 2:3) ./ sum(cmf(:, 2:4), 2);
 xy0_int = min(max(floor(xy0 / grid) + 1, 1), wrev(img_size));
 mask = poly2mask(xy0_int(:, 1), xy0_int(:, 2), img_size(1), img_size(2));
@@ -100,7 +100,7 @@ function draw_boundary(lambda, color, linewidth)
 % DESCRIPTION
 %   It draws the boundary of chromaticity diagram
 
-cmf = colorspace.util.xyz_cmf();
+cmf = colorspace.xyz_cmf();
 xyz0 = interp1(cmf(:, 1), cmf(:, 2:4), lambda);
 xy0 = xyz0(:, 1:2) ./ sum(xyz0, 2);
 xy_line = interp1([1; 0], [xy0(end, :); xy0(1, :)], linspace(1, 0, 20));
