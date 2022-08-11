@@ -2,7 +2,7 @@ clear; close all; clc;
 
 blackbody_temperature = 6500;
 wl = (400:1:700)';
-spec = [wl, black_body_radiance(wl, blackbody_temperature)];
+spec = [wl, colorvis.black_body_radiance(wl, blackbody_temperature)];
 
 ev_store = -4:.01:3;
 ev_num = length(ev_store);
