@@ -1,8 +1,8 @@
-function coef = get_yuv_coef(cs_name)
+function coef = get_ycbcr_coef(cs_name)
 % DESCRIPTION
 %   Get a parameter array for transfer characteristics. [a, b, g, k].
 % SYNTAX
-%   coef = get_yuv_coef(cs_name);
+%   coef = get_ycbcr_coef(cs_name);
 % INPUT
 %   cs_name:            A string, expected to be a valid colorspace name, such as '709'.
 %                       See colorutil.cs_name_validator for detail.

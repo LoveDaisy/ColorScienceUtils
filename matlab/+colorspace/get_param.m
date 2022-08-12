@@ -54,5 +54,5 @@ if isempty(p.Results.lin)
 else
     param.tsf = colorspace.get_trc('linear');
 end
-param.yuv = colorspace.get_yuv_coef(cs_name);
+param.yuv = colorspace.get_ycbcr_coef(cs_name);
 end
