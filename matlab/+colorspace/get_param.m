@@ -1,9 +1,13 @@
-function pram = get_param(space)
+function param = get_param(cs_name, varargin)
 % DESCRIPTION
 %   Get colorspace prameters, including xy-coordinate of R, G, B, and white point,
 %   and gamma, etc.
+% SYNTAX
+%   param = get_param(name);
+%   param = get_param(name, 'linear');
 % INPUT
-%   space:      The colorspace name. See colorutil.cs_name_validator for detail.
+%   name:      The colorspace name. See colorutil.cs_name_validator for detail.
+%   linear:     'linear'. Whether use a linear transfer characteristics.
 % OUTPUT
 %   param:       A struct containing fields as following:
 %               .w:         1*3 vector, white point, XYZ coordinate.
@@ -13,71 +17,42 @@ function pram = get_param(space)
 %                           See colorspace.rgb_gamma & colorspace.rgb_ungamma for detail.
 
 p = inputParser;
-p.addRequired('space', @colorutil.cs_name_validator);
-p.parse(space);
+p.addRequired('name', @colorutil.cs_name_validator);
+p.addOptional('lin', [], @(x) strcmpi(x, 'linear'));
+p.parse(cs_name, varargin{:});
 
-if strcmpi(space, 'sRGB')
+if strcmpi(cs_name, 'sRGB')
     name = 'srgb';
     w_name = 'D65';
-    g = 2.4;
-    a = 0.055;
-    b = 0.0031308;
-    k = 12.92;
-    y_coef = [1/3, 1/3, 1/3];
-    cbcr_coef = [1, 1];
-elseif strcmpi(space, 'AdobeRGB') || strcmpi(space, 'ARGB')
+elseif strcmpi(cs_name, 'AdobeRGB') || strcmpi(cs_name, 'ARGB')
     name = 'argb';
     w_name = 'D65';
-    g = 2.2;
-    a = 0;
-    b = 0;
-    k = 0;
-    y_coef = [1/3, 1/3, 1/3];
-    cbcr_coef = [1, 1];
-elseif strcmpi(space, '709')
+elseif strcmpi(cs_name, '709')
     name = '709';
     w_name = 'D65';
-    g = 1 / 0.45;
-    a = 0.099;
-    b = 0.018;
-    k = 4.5;
-    y_coef = [0.2126, 0.7152, 0.0722];
-    cbcr_coef = [1.8556, 1.5748];
-elseif strcmpi(space, '2020')
+elseif strcmpi(cs_name, '2020')
     name = '2020';
     w_name = 'D65';
-    g = 1 / 0.45;
-    a = 0.099297;
-    b = 0.018053;
-    k = 4.5;
-    y_coef = [0.2627, 0.6780, 0.0593];
-    cbcr_coef = [1.8814, 1.4746];
-elseif strcmpi(space, 'p3d65') || strcmpi(space, 'd65p3') ||strcmpi(space, 'displayp3')
+elseif strcmpi(cs_name, 'p3d65') || strcmpi(cs_name, 'd65p3') ||strcmpi(cs_name, 'displayp3')
     name = 'p3d65';
     w_name = 'D65';
-    g = 1 / 0.45;
-    a = 0.099297;
-    b = 0.018053;
-    k = 4.5;
-    y_coef = [0.2627, 0.6780, 0.0593];
-    cbcr_coef = [1.8814, 1.4746];
-elseif strcmpi(space, 'p3dci') || strcmpi(space, 'dci3')
+elseif strcmpi(cs_name, 'p3dci') || strcmpi(cs_name, 'dci3')
     name = 'p3dci';
     w_name = 'D65';
-    g = 1 / 0.45;
-    a = 0.099297;
-    b = 0.018053;
-    k = 4.5;
-    y_coef = [0.2627, 0.6780, 0.0593];
-    cbcr_coef = [1.8814, 1.4746];
 else
-    warning('Input color space %d cannot recognize! Use default sRGB!', space);
+    warning('Input color space %d cannot recognize! Use default sRGB!', cs_name);
+    name = 'srgb';
+    w_name = 'D65';
 end
 
-pram.short_name = name;
-pram.w_name = w_name;
-pram.w = colorspace.get_white_point(w_name);
-pram.rgb = colorspace.get_primaries(name);
-pram.tsf = [a, b, g, k];
-pram.yuv = [y_coef, cbcr_coef];
+param.short_name = name;
+param.w_name = w_name;
+param.w = colorspace.get_white_point(w_name);
+param.rgb = colorspace.get_primaries(name);
+if isempty(p.Results.lin)
+    param.tsf = colorspace.get_trc(cs_name);
+else
+    param.tsf = colorspace.get_trc('linear');
+end
+param.yuv = colorspace.get_yuv_coef(cs_name);
 end
