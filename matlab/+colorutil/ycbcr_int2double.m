@@ -1,12 +1,12 @@
-function [y, u, v] = yuv2double(y, u, v, varargin)
+function [y, u, v] = ycbcr_int2double(y, u, v, varargin)
 % DESCRIPTION
 %   It converts integer YCbCr values to double value, and scale them properly, so that
 %   Y component is expected in range [0, 1], Cb and Cr components are expected in range [-0.5, 0.5].
 %   It DOES NOT clip any value out of range.
 % SYNTAX
-%   [y, u, v] = yuv2double(y, u, v);
-%   [y, u, v] = yuv2double(y, u, v, bits);
-%   [y, u, v] = yuv2double(y, u, v, bits, color_range);
+%   [y, u, v] = ycbcr_int2double(y, u, v);
+%   [y, u, v] = ycbcr_int2double(y, u, v, bits);
+%   [y, u, v] = ycbcr_int2double(y, u, v, bits, color_range);
 % INPUT
 %   y:              Any shape array of integer type. If it is of double type, it will return immediately.
 %   u, v:           Any shape array of integer type. If it is of double type, it will return immediately.
