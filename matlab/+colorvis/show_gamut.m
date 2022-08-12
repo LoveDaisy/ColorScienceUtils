@@ -58,7 +58,7 @@ switch lower(p.Results.space)
 end
 
 % Plot vertices
-if p.Results.Vertex
+if p.Results.Vertex && ~p.Results.Fill
     rgb = [end_points(:, 1:3) + end_points(:, 4:6); end_points(:, 4:6); 0, 0, 0];
     rgb = unique(rgb, 'rows');
     data = tf(rgb);

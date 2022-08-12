@@ -5,12 +5,13 @@ function o = hlg_eotf(e)
 % SYNTAX
 %   o = hlg_eotf(e)
 % INPUT
-%   e:        n*3 array. Non linear HLG signal (RGB).
+%   e:        n*3 array or m*n*3 image. Non linear HLG signal (RGB).
+%             Because it invokes colorspace.hlg_ootf, so input must be RGB data.
 % OUTPUT
-%   o:        n*3 array. Linear display signal (RGB).
+%   o:        The same shape to input e. Linear display signal (RGB).
 
 p = inputParser;
-p.addRequired('rgb', @(x) validateattributes(x, {'numeric'}, {'2d', 'ncols', 3}));
+p.addRequired('rgb', @colorutil.image_shape_validator);
 p.parse(e);
 
 Lb = 0;
