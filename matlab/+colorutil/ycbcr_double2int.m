@@ -33,17 +33,20 @@ if strcmpi(p.Results.range, 'tv') || strcmpi(p.Results.range, 'limited')
     y = y * 219 / 256 + 16 / 256;
     u = u * 224 / 256 + 0.5;
     v = v * 224 / 256 + 0.5;
+else
+    u = u + 0.5;
+    v = v + 0.5;
 end
 
 y = y * 2^p.Results.bits;
 u = u * 2^p.Results.bits;
 v = v * 2^p.Results.bits;
 
-if bits <= 8
+if p.Results.bits <= 8
     y = uint8(y);
     u = uint8(u);
     v = uint8(v);
-elseif bits <= 16
+elseif p.Results.bits <= 16
     y = uint16(y);
     u = uint16(u);
     v = uint16(v);
