@@ -16,9 +16,13 @@ p.parse(xyz);
 
 w = colorspace.get_white_point('D65');
 xyz = reshape(xyz, [], 3) ./ w;
+max_y = max(xyz(:, 2));
+xyz = xyz ./ max_y;
+
 lab = zeros(size(xyz));
-lab(:, 1) = 1.16 * colorspace.lab_transfer(xyz(:, 2)) - 0.16;
-lab(:, 2) = 5 * (colorspace.lab_transfer(xyz(:, 1)) - colorspace.lab_transfer(xyz(:, 2))) / 5.12;
-lab(:, 3) = 2 * (colorspace.lab_transfer(xyz(:, 2)) - colorspace.lab_transfer(xyz(:, 3))) / 5.12;
+f_xyz = colorspace.lab_transfer(xyz);
+lab(:, 1) = (1.16 * f_xyz(:, 2) - 0.16);
+lab(:, 2) = 5 * (f_xyz(:, 1) - f_xyz(:, 2)) / 5.12;
+lab(:, 3) = 2 * (f_xyz(:, 2) - f_xyz(:, 3)) / 5.12;
 lab = reshape(lab, input_size);
 end

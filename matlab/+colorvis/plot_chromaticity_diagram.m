@@ -137,7 +137,7 @@ idx = sub2ind(hist_img_size, ...
     min(max(floor(xy(:, 2) / grid) + 1, 1), hist_img_size(1)), ...
     min(max(floor(xy(:, 1) / grid) + 1, 1), hist_img_size(2)));
 cnt = accumarray(idx, 1, [prod(hist_img_size), 1]);
-k = (cnt(:) / max(cnt(:)) * 1.2).^0.45;
+k = (cnt(:) / max(cnt(:)) * 1.2).^(0.8);
 
 [xx, yy] = meshgrid(hist_img_x, hist_img_y);
 xy_grid = [xx(:), yy(:)];
