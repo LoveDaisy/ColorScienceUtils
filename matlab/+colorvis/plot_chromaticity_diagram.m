@@ -127,7 +127,8 @@ function plot_xy_hist(xyz, grid, background, dark_th)
 
 xyz = reshape(xyz, [], 3);
 valid_idx = xyz(:, 2) > dark_th;
-xy = xyz(valid_idx, 1:2) ./ sum(xyz(valid_idx, :), 2);
+xyz = max(xyz(valid_idx, :), 1e-8);
+xy = xyz(:, 1:2) ./ sum(xyz, 2);
 
 hist_img_x = 0:grid:0.8;
 hist_img_y = 0:grid:0.9;
