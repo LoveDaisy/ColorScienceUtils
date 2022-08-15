@@ -12,14 +12,14 @@ function xyz = lab2xyz(lab)
 input_size = size(lab);
 
 p = inputParser;
-p.addRequired('lab', @colorspace.util.image_shape_validator);
+p.addRequired('lab', @colorutil.image_shape_validator);
 p.parse(lab);
 
-w = colorspace.util.get_white_point('D65');
+w = colorspace.get_white_point('D65');
 lab = reshape(lab, [], 3) ./ [1.16, 5/5.12, 2/5.12];
 xyz = zeros(size(lab));
-xyz(:, 1) = w(1) * colorspace.util.lab_inverse_transfer(lab(:, 1) + 0.16 / 1.16 + lab(:, 2));
-xyz(:, 2) = w(2) * colorspace.util.lab_inverse_transfer(lab(:, 1) + 0.16 / 1.16);
-xyz(:, 3) = w(3) * colorspace.util.lab_inverse_transfer(lab(:, 1) + 0.16 / 1.16 - lab(:, 3));
+xyz(:, 1) = w(1) * colorspace.lab_inverse_transfer(lab(:, 1) + 0.16 / 1.16 + lab(:, 2));
+xyz(:, 2) = w(2) * colorspace.lab_inverse_transfer(lab(:, 1) + 0.16 / 1.16);
+xyz(:, 3) = w(3) * colorspace.lab_inverse_transfer(lab(:, 1) + 0.16 / 1.16 - lab(:, 3));
 xyz = reshape(xyz, input_size);
 end

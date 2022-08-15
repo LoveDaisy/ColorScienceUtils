@@ -5,52 +5,55 @@ function plot_chromaticity_diagram(varargin)
 %   plot_chromaticity_diagram();
 %   plot_chromaticity_diagram(Name, Value...)
 % OPTIONS
-%   'xy':               n*2 array.
-%   'fill':             true | false. Whether to fill the diagram with (approximate) RGB color.
-%                       If xy is set, this option will be ignore.
-%   'color':            'real' | 3-elements RGB value. Default is 'real'.
-%   'background':       3-elements RGB value. Default is [0.1, 0.1, 0.1].
-%   'linewidth':        A scalar. Default is 1.2.
-%   'primaries':        A string for colorspace name, or a struct of colorspace parameter. See
-%                       colorspace.util.cs_param_validator for detail. Default is empty.
-%   'pri_color':        3-elements RGB value. Default is [0.6, 0.6, 0.6]. The color for
+%   'HistData':         n*3 array, or m*n*3 image, xyz data used for 2d histogram.
+%   'HistDarkTh':       A scalar in [0, 1]. Y components less than this threshold will not count in
+%                       for histogram. Default is 0.07.
+%   'Fill':             true | false. Whether to fill the diagram with (approximate) RGB color.
+%                       If HistData is set, this option will be ignore.
+%   'Color':            'real' | 3-elements RGB value. Default is 'real'.
+%   'Background':       3-elements RGB value. Default is [0.1, 0.1, 0.1].
+%   'LineWidth':        A scalar. Default is 1.2.
+%   'Pri':              A string for colorspace name, or a struct of colorspace parameter. See
+%                       colorutil.cs_param_validator for detail. Default is empty.
+%   'PriColor':         3-elements RGB value. Default is [0.6, 0.6, 0.6]. The color for
 %                       primary vertices and boundary.
-%   'lambda':           row vector, the wavelength values. Default is 400:760.
+%   'Lambda':           row vector, the wavelength values. Default is 400:760.
 
 p = inputParser;
-p.addParameter('lambda', 400:760, @(x) validateattributes(x, {'numeric'}, {'row'}));
-p.addParameter('color', 'real', @(x) ischar(x) && strcmpi(x, 'real') || ...
+p.addParameter('HistData', [], @colorutil.image_shape_validator);
+p.addParameter('HistDarkTh', 0.07, @isnumeric);
+p.addParameter('Fill', false, @islogical);
+p.addParameter('Color', 'real', @(x) ischar(x) && strcmpi(x, 'real') || ...
     isnumeric(x) && isvector(x) && length(x) == 3);
-p.addParameter('background', [0.1, 0.1, 0.1], @(x) isnumeric(x) && isvector(x) && length(x) == 3);
-p.addParameter('linewidth', 1.2, @isscalar);
-p.addParameter('primaries', [], @colorspace.util.cs_param_validator);
-p.addParameter('pri_color', [0.6, 0.6, 0.6], @(x) isnumeric(x) && isvector(x) && length(x) == 3);
-p.addParameter('xy', [], @(x) validateattributes(x, {'numeric'}, {'2d', 'ncols', 2}));
-p.addParameter('fill', false, @islogical);
+p.addParameter('Background', [0.1, 0.1, 0.1], @(x) isnumeric(x) && isvector(x) && length(x) == 3);
+p.addParameter('LineWidth', 1.2, @isscalar);
+p.addParameter('Pri', [], @colorutil.cs_param_validator);
+p.addParameter('PriColor', [0.6, 0.6, 0.6], @(x) isnumeric(x) && isvector(x) && length(x) == 3);
+p.addParameter('Lambda', 400:760, @(x) validateattributes(x, {'numeric'}, {'row'}));
 p.parse(varargin{:});
 
 nextplot = get(gca, 'NextPlot');
 hold on;
 
-if ~isempty(p.Results.xy)
+if ~isempty(p.Results.HistData)
     grid = 0.0025;
-    plot_xy_hist(p.Results.xy, grid, p.Results.background);
+    plot_xy_hist(p.Results.HistData, grid, p.Results.Background, p.Results.HistDarkTh);
 end
 
-if isempty(p.Results.xy) && p.Results.fill
+if isempty(p.Results.HistData) && p.Results.Fill
     % Fill the diagram
-    fill_chromaticity(p.Results.background);
+    fill_chromaticity(p.Results.Background);
 end
 
-if p.Results.linewidth > 0
-    draw_boundary(p.Resultss.lambda, p.Results.color, p.Results.linewidth);
+if p.Results.LineWidth > 0
+    draw_boundary(p.Results.Lambda, p.Results.Color, p.Results.LineWidth);
 end
 
-if ~isempty(p.Results.primaries)
-    show_primaries(p.Results.primaries, p.Results.pri_color);
+if ~isempty(p.Results.Pri)
+    show_primaries(p.Results.Pri, p.Results.PriColor);
 end
 
-set(gca, 'color', p.Results.background, 'NextPlot', nextplot);
+set(gca, 'color', p.Results.Background, 'NextPlot', nextplot);
 end
 
 
@@ -58,14 +61,14 @@ function fill_chromaticity(background)
 % DESCRIPTION
 %   It fills the diagram with approximate RGB color.
 
-w0 = colorspace.util.get_white_point('D65');
+w0 = colorspace.get_white_point('D65');
 
 grid = 0.0005;
 img_x = 0:grid:0.8;
 img_y = 0:grid:0.9;
 img_size = [length(img_y), length(img_x)];
 
-cmf = colorspace.util.xyz_cmf();
+cmf = colorspace.xyz_cmf();
 xy0 = cmf(:, 2:3) ./ sum(cmf(:, 2:4), 2);
 xy0_int = min(max(floor(xy0 / grid) + 1, 1), wrev(img_size));
 mask = poly2mask(xy0_int(:, 1), xy0_int(:, 2), img_size(1), img_size(2));
@@ -100,7 +103,7 @@ function draw_boundary(lambda, color, linewidth)
 % DESCRIPTION
 %   It draws the boundary of chromaticity diagram
 
-cmf = colorspace.util.xyz_cmf();
+cmf = colorspace.xyz_cmf();
 xyz0 = interp1(cmf(:, 1), cmf(:, 2:4), lambda);
 xy0 = xyz0(:, 1:2) ./ sum(xyz0, 2);
 xy_line = interp1([1; 0], [xy0(end, :); xy0(1, :)], linspace(1, 0, 20));
@@ -118,9 +121,14 @@ end
 end
 
 
-function plot_xy_hist(xy, grid, background)
+function plot_xy_hist(xyz, grid, background, dark_th)
 % DESCRIPTION
-%   Plots 2D histogram of xy data on chromaticity diagram.
+%   Plots 2D histogram of projected xyz data on chromaticity diagram.
+
+xyz = reshape(xyz, [], 3);
+valid_idx = xyz(:, 2) > dark_th;
+xyz = max(xyz(valid_idx, :), 1e-8);
+xy = xyz(:, 1:2) ./ sum(xyz, 2);
 
 hist_img_x = 0:grid:0.8;
 hist_img_y = 0:grid:0.9;
@@ -129,7 +137,7 @@ idx = sub2ind(hist_img_size, ...
     min(max(floor(xy(:, 2) / grid) + 1, 1), hist_img_size(1)), ...
     min(max(floor(xy(:, 1) / grid) + 1, 1), hist_img_size(2)));
 cnt = accumarray(idx, 1, [prod(hist_img_size), 1]);
-k = (cnt(:) / max(cnt(:))).^0.45;
+k = (cnt(:) / max(cnt(:)) * 1.2).^(0.8);
 
 [xx, yy] = meshgrid(hist_img_x, hist_img_y);
 xy_grid = [xx(:), yy(:)];

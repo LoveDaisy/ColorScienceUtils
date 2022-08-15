@@ -4,7 +4,7 @@ function res = cs_param_validator(in)
 %   a colorspace parameter structure.
 
 if ischar(in)
-    res = colorspace.util.cs_name_validator(in);
+    res = colorutil.cs_name_validator(in);
 else
     res = isstruct(in) && isscalar(in) && isfield(in, 'short_name') && ...
         isfield(in, 'w') && isfield(in, 'w_name') && isfield(in, 'rgb') && isfield(in, 'tsf') && ...

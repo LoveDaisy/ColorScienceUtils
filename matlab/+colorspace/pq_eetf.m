@@ -18,7 +18,7 @@ p.parse(e, varargin{:});
 master_Lbw = [0, 10000];
 target_Lbw = p.Results.targetLbw;
 
-f = @colorspace.util.pq_inverse_eotf;
+f = @colorspace.pq_inverse_eotf;
 e1 = (e - f(master_Lbw(1))) ./ (f(master_Lbw(2)) - f(master_Lbw(1)));
 lum_min = (f(target_Lbw(1)) - f(master_Lbw(1))) / (f(master_Lbw(2)) - f(master_Lbw(1)));
 lum_max = (f(target_Lbw(2)) - f(master_Lbw(1))) / (f(master_Lbw(2)) - f(master_Lbw(1)));

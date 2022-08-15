@@ -15,6 +15,6 @@ c = 0.5 - a * log(4 * a);
 
 lower_idx = o < 1/12;
 e = o;
-e(lower_idx) = sqrt(3 * o(lower_idx));
+e(lower_idx) = sqrt(3 * abs(o(lower_idx))) .* sign(o(lower_idx));
 e(~lower_idx) = a * log(12 * o(~lower_idx) - b) + c;
 end

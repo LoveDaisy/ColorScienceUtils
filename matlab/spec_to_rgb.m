@@ -9,12 +9,12 @@ function rgb = spec_to_rgb(spec, varargin)
 %                       Wavelength is in nm.
 % PARAMETER
 %   'ColorSpace':     	A string for colorspace. Default is 'sRGB'.
-%                       see colorspace.util.cs_name_validator for detail.
+%                       see colorutil.cs_name_validator for detail.
 %   'Mixed':            Whether to recognize input spectrum as single color. Default is true.
 %                       If set to false, each row in spec will result a color, representing
 %                       a pure spectral color.
 %   'Clamping':         A string for RGB clamping method. Default is 'Clip'.
-%                       see colorspace.util.rgb_compression_validator for detail.
+%                       see colorutil.rgb_compression_validator for detail.
 %   'Y':                Expected output luminance (Y component). Default is 1.0.
 %                       If 'Mixed' is set to false, then 'Y' is the max lumincance.
 % OUTPUT
@@ -23,9 +23,9 @@ function rgb = spec_to_rgb(spec, varargin)
 
 p = inputParser;
 p.addRequired('spec', @(x) validateattributes(x, {'numeric'}, {'2d', 'ncols', 2}));
-p.addParameter('ColorSpace', 'sRGB', @colorspace.util.cs_name_validator);
+p.addParameter('ColorSpace', 'sRGB', @colorutil.cs_name_validator);
 p.addParameter('Mixed', true, @(x) validateattributes(x, {'logical'}, {'scalar'}));
-p.addParameter('Clamping', 'DeSat', @colorspace.util.rgb_compression_validator);
+p.addParameter('Clamping', 'DeSat', @colorutil.rgb_compression_validator);
 p.addParameter('Y', 1, @(x) validateattributes(x, {'numeric'}, {'scalar'}));
 p.parse(spec, varargin{:});
 
