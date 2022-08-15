@@ -1,4 +1,4 @@
-function lab = rgb2lab(rgb, varargin)
+function [lab, max_y] = rgb2lab(rgb, varargin)
 % DESCRIPTION
 %   Convert RGB color to Lab data.
 % SYNTAX
@@ -14,5 +14,5 @@ function lab = rgb2lab(rgb, varargin)
 %   lab:            The same shape to input rgb. L ranges between [0, 1].
 
 xyz = colorspace.rgb2xyz(rgb, varargin{:});
-lab = colorspace.xyz2lab(xyz);
+[lab, max_y] = colorspace.xyz2lab(xyz);
 end

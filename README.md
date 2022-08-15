@@ -70,7 +70,7 @@ And also you can plot 2D and 3D density map for color distribution. Say if we ha
 ```matlab
 % Plot 2D density map
 xyz = colorspace.rgb2xyz(rgb_image, 'sRGB');
-colorvis.plot_chromaticity_diagram('HistData', xyz);
+colorvis.plot_chromaticity_diagram('XYZData', xyz);
 ```
 ![xy_hist](matlab/img/xy_hist.png)
 

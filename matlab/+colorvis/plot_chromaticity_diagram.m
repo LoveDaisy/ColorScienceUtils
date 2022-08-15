@@ -5,11 +5,11 @@ function plot_chromaticity_diagram(varargin)
 %   plot_chromaticity_diagram();
 %   plot_chromaticity_diagram(Name, Value...)
 % OPTIONS
-%   'HistData':         n*3 array, or m*n*3 image, xyz data used for 2d histogram.
-%   'HistDarkTh':       A scalar in [0, 1]. Y components less than this threshold will not count in
+%   'XYZData':          n*3 array, or m*n*3 image, xyz data used for 2d histogram.
+%   'DarkTh':           A scalar in [0, 1]. Y components less than this threshold will not count in
 %                       for histogram. Default is 0.07.
 %   'Fill':             true | false. Whether to fill the diagram with (approximate) RGB color.
-%                       If HistData is set, this option will be ignore.
+%                       If XYZData is set, this option will be ignore.
 %   'Color':            'real' | 3-elements RGB value. Default is 'real'.
 %   'Background':       3-elements RGB value. Default is [0.1, 0.1, 0.1].
 %   'LineWidth':        A scalar. Default is 1.2.
@@ -20,8 +20,8 @@ function plot_chromaticity_diagram(varargin)
 %   'Lambda':           row vector, the wavelength values. Default is 420:760.
 
 p = inputParser;
-p.addParameter('HistData', [], @colorutil.image_shape_validator);
-p.addParameter('HistDarkTh', 0.07, @isnumeric);
+p.addParameter('XYZData', [], @colorutil.image_shape_validator);
+p.addParameter('DarkTh', 0.07, @isnumeric);
 p.addParameter('Fill', false, @islogical);
 p.addParameter('Color', 'real', @(x) ischar(x) && strcmpi(x, 'real') || ...
     isnumeric(x) && isvector(x) && length(x) == 3);
@@ -35,12 +35,12 @@ p.parse(varargin{:});
 nextplot = get(gca, 'NextPlot');
 hold on;
 
-if ~isempty(p.Results.HistData)
+if ~isempty(p.Results.XYZData)
     grid = 0.0025;
-    plot_xy_hist(p.Results.HistData, grid, p.Results.Background, p.Results.HistDarkTh);
+    plot_xy_hist(p.Results.XYZData, grid, p.Results.Background, p.Results.DarkTh);
 end
 
-if isempty(p.Results.HistData) && p.Results.Fill
+if isempty(p.Results.XYZData) && p.Results.Fill
     fill_chromaticity(p.Results.Lambda, p.Results.Background);
 end
 
