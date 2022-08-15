@@ -1,0 +1,9 @@
+**.png filter=lfs diff=lfs merge=lfs -text
+**.jpg filter=lfs diff=lfs merge=lfs -text
+**.jpeg filter=lfs diff=lfs merge=lfs -text
+**.gif filter=lfs diff=lfs merge=lfs -text
+matlab/img/plot_yuv.png filter=lfs diff=lfs merge=lfs -text
+matlab/img/scene_img.jpg filter=lfs diff=lfs merge=lfs -text
+matlab/img/xy_hist.png filter=lfs diff=lfs merge=lfs -text
+matlab/img/chromaticity_boundary.png filter=lfs diff=lfs merge=lfs -text
+matlab/img/chromaticity_fill.png filter=lfs diff=lfs merge=lfs -text
