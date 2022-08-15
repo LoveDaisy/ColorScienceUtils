@@ -16,6 +16,7 @@ function plot_gamut_bubble_hist(rgb, varargin)
 %   'ZScale':       'Linear' | 'log'. Default is linear.
 %   'Background':   3-element RGB color. Default is [0.1, 0.1, 0.1].
 %   'DarkTh':       A scalar. Default is 0.05.
+%   'BubbleScale':  A scalar. Default is 1.0.
 
 p = inputParser;
 p.addRequired('rgb', @colorutil.image_shape_validator);
@@ -24,6 +25,7 @@ p.addOptional('ucs', 'Lab', @(x) ischar(x) && (strcmpi(x, 'lab') || strcmpi(x, '
 p.addParameter('zscale', 'linear', @(x) strcmpi(x, 'linear') || strcmpi(x, 'log'));
 p.addParameter('background', [1, 1, 1]*0.1, @(x) isnumeric(x) && isvector(x) && length(x) == 3);
 p.addParameter('DarkTh', 0.05, @(x) isnumeric(x) && isscalar(x));
+p.addParameter('BubbleScale', 1.0, @(x) isnumeric(x) && isscalar(x));
 p.parse(rgb, varargin{:});
 
 zscale_log = strcmpi(p.Results.zscale, 'log');
@@ -80,7 +82,7 @@ if zscale_log
 end
 
 s0 = prctile(cnt, 99.5);
-bubble_size = min((cnt / s0 + 0.001), 1) * 80;
+bubble_size = min((cnt / s0 + 0.001), 1) * 80 * p.Results.BubbleScale;
 bubble_color = inv_tf(bubble_center);
 
 next_plot = get(gca, 'NextPlot');
