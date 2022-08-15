@@ -17,7 +17,7 @@ function plot_chromaticity_diagram(varargin)
 %                       colorutil.cs_param_validator for detail. Default is empty.
 %   'PriColor':         3-elements RGB value. Default is [0.6, 0.6, 0.6]. The color for
 %                       primary vertices and boundary.
-%   'Lambda':           row vector, the wavelength values. Default is 400:760.
+%   'Lambda':           row vector, the wavelength values. Default is 420:760.
 
 p = inputParser;
 p.addParameter('HistData', [], @colorutil.image_shape_validator);
@@ -29,7 +29,7 @@ p.addParameter('Background', [0.1, 0.1, 0.1], @(x) isnumeric(x) && isvector(x) &
 p.addParameter('LineWidth', 1.2, @isscalar);
 p.addParameter('Pri', [], @colorutil.cs_param_validator);
 p.addParameter('PriColor', [0.6, 0.6, 0.6], @(x) isnumeric(x) && isvector(x) && length(x) == 3);
-p.addParameter('Lambda', 400:760, @(x) validateattributes(x, {'numeric'}, {'row'}));
+p.addParameter('Lambda', 420:760, @(x) validateattributes(x, {'numeric'}, {'row'}));
 p.parse(varargin{:});
 
 nextplot = get(gca, 'NextPlot');
@@ -41,11 +41,10 @@ if ~isempty(p.Results.HistData)
 end
 
 if isempty(p.Results.HistData) && p.Results.Fill
-    % Fill the diagram
-    fill_chromaticity(p.Results.Background);
+    fill_chromaticity(p.Results.Lambda, p.Results.Background);
 end
 
-if p.Results.LineWidth > 0
+if p.Results.LineWidth > 0 && ~p.Results.Fill
     draw_boundary(p.Results.Lambda, p.Results.Color, p.Results.LineWidth);
 end
 
@@ -53,23 +52,26 @@ if ~isempty(p.Results.Pri)
     show_primaries(p.Results.Pri, p.Results.PriColor);
 end
 
-set(gca, 'color', p.Results.Background, 'NextPlot', nextplot);
+box on;
+axis equal; axis tight;
+set(gca, 'color', p.Results.Background, 'NextPlot', nextplot, 'xlim', [-0.05, 0.81], 'ylim', [-0.01, 0.91]);
 end
 
 
-function fill_chromaticity(background)
+function fill_chromaticity(lambda, background)
 % DESCRIPTION
 %   It fills the diagram with approximate RGB color.
 
 w0 = colorspace.get_white_point('D65');
 
-grid = 0.0005;
+grid = 0.00025;
 img_x = 0:grid:0.8;
 img_y = 0:grid:0.9;
 img_size = [length(img_y), length(img_x)];
 
 cmf = colorspace.xyz_cmf();
-xy0 = cmf(:, 2:3) ./ sum(cmf(:, 2:4), 2);
+xyz0 = interp1(cmf(:, 1), cmf(:, 2:4), lambda);
+xy0 = xyz0(:, 1:2) ./ sum(xyz0, 2);
 xy0_int = min(max(floor(xy0 / grid) + 1, 1), wrev(img_size));
 mask = poly2mask(xy0_int(:, 1), xy0_int(:, 2), img_size(1), img_size(2));
 
