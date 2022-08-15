@@ -14,7 +14,7 @@ function plot_gamut_bubble_hist(rgb, varargin)
 %   ucs:            A string for UCS (uniform color space). One of {'xyY', 'Lab'}
 % OPTIONS
 %   'ZScale':       'Linear' | 'log'. Default is linear.
-%   'Background':   3-element RGB color. Default is [0.1, 0.1, 0.1].
+%   'Background':   3-element RGB color. Default is [0.23, 0.23, 0.23].
 %   'DarkTh':       A scalar. Default is 0.05.
 %   'BubbleScale':  A scalar. Default is 1.0.
 
@@ -23,7 +23,7 @@ p.addRequired('rgb', @colorutil.image_shape_validator);
 p.addOptional('src_space', 'sRGB', @colorutil.cs_param_validator);
 p.addOptional('ucs', 'Lab', @(x) ischar(x) && (strcmpi(x, 'lab') || strcmpi(x, 'xyy')));
 p.addParameter('zscale', 'linear', @(x) strcmpi(x, 'linear') || strcmpi(x, 'log'));
-p.addParameter('background', [1, 1, 1]*0.1, @(x) isnumeric(x) && isvector(x) && length(x) == 3);
+p.addParameter('background', [1, 1, 1]*0.23, @(x) isnumeric(x) && isvector(x) && length(x) == 3);
 p.addParameter('DarkTh', 0.05, @(x) isnumeric(x) && isscalar(x));
 p.addParameter('BubbleScale', 1.0, @(x) isnumeric(x) && isscalar(x));
 p.parse(rgb, varargin{:});
@@ -82,7 +82,7 @@ if zscale_log
 end
 
 s0 = prctile(cnt, 99.5);
-bubble_size = min((cnt / s0 + 0.001), 1) * 80 * p.Results.BubbleScale;
+bubble_size = min((cnt / s0 + 0.001), 1) * 30 * p.Results.BubbleScale;
 bubble_color = inv_tf(bubble_center);
 
 next_plot = get(gca, 'NextPlot');

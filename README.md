@@ -1,7 +1,7 @@
-# ColorScienceUtils
+# Color Science Utilities
 
 A toolkit for color science. The first codes are in MATLAB, which is just my personal choice.
-I will add python codes later.
+I will try python later.
 
 ## Quick start
 
@@ -53,26 +53,39 @@ Result of `plot_yuv()`:
 Here are also several visualization tools for color gamut.
 
 ```matlab
-% Fig. a, show chromaticity diagram boundary.
-figure;
+% Show chromaticity diagram boundary.
 colorvis.plot_chromaticity_diagram();
 ```
 ![chm_boundary](matlab/img/chromaticity_boundary.png)
 
 ```matlab
-% Fig. b, fill chromaticity diagram
-figure;
+% Fill chromaticity diagram
 colorvis.plot_chromaticity_diagram('Fill', true, 'Background', [1, 1, 1]);
 ```
 ![fill_chm](matlab/img/chromaticity_fill.png)
 
+And also you can plot 2D and 3D density map for color distribution. Say if we have this image:
+![scene_image](matlab/img/scene_img.jpg)
+
 ```matlab
-% Fig. c, plot 2D density map
-figure;
+% Plot 2D density map
 xyz = colorspace.rgb2xyz(rgb_image, 'sRGB');
 colorvis.plot_chromaticity_diagram('HistData', xyz);
 ```
 ![xy_hist](matlab/img/xy_hist.png)
+
+```matlab
+% Plot 3D density map (here I call it bubble plot).
+% Default shown in Lab space.
+colorvis.plot_gamut_bubble_hist(rgb_image, 'sRGB');
+```
+![lab_bubble](matlab/img/Lab_bubble.png)
+
+```matlab
+% Or display in xyY space, and use log scale for luminance axis.
+colorvis.plot_gamut_bubble_hist(rgb_image, 'sRGB', 'xyY', 'ZScale', 'log');
+```
+![xyy_bubble](matlab/img/xyY_bubble.png)
 
 ## TODO
 - [ ] Add more test cases
