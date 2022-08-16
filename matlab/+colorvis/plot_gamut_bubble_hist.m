@@ -15,7 +15,8 @@ function plot_gamut_bubble_hist(rgb, varargin)
 % OPTIONS
 %   'ZScale':           'Linear' | 'log'. Default is linear.
 %   'Background':       3-element RGB color. Default is [0.23, 0.23, 0.23].
-%   'DarkTh':           A scalar. Default is 0.0.
+%   'DarkTh':           A scalar. Default is 0.0. Only luminance greater than max(lum)*th will be counted in.
+%   'WhiteTh':          A scalar. Default is 1.0. Only luminance less than max(lum)*th will be counted in.
 %   'BubbleScale':      A scalar. Default is 1.0.
 %   'BubbleDensity':    A scalar. Default is 1.0.
 
@@ -26,13 +27,14 @@ p.addOptional('ucs', 'Lab', @(x) ischar(x) && (strcmpi(x, 'lab') || strcmpi(x, '
 p.addParameter('zscale', 'linear', @(x) strcmpi(x, 'linear') || strcmpi(x, 'log'));
 p.addParameter('background', [1, 1, 1]*0.23, @(x) isnumeric(x) && isvector(x) && length(x) == 3);
 p.addParameter('DarkTh', 0.0, @(x) isnumeric(x) && isscalar(x));
+p.addParameter('WhiteTh', 1.0, @(x) isnumeric(x) && isscalar(x));
 p.addParameter('BubbleScale', 1.0, @(x) isnumeric(x) && isscalar(x));
 p.addParameter('BubbleDensity', 1.0, @(x) isnumeric(x) && isscalar(x));
 p.parse(rgb, varargin{:});
 
 zscale_log = strcmpi(p.Results.zscale, 'log');
 
-[data, color_func] = convert_data_ucs(rgb, p.Results.src_space, p.Results.ucs, p.Results.DarkTh);
+[data, color_func] = convert_data_ucs(rgb, p.Results.src_space, p.Results.ucs, [p.Results.DarkTh, p.Results.WhiteTh]);
 [bubble_center, bubble_size, ranges] = collect_bubble(data, p.Results.BubbleScale, p.Results.BubbleDensity, zscale_log);
 bubble_color = color_func(bubble_center);
 
@@ -57,19 +59,17 @@ set(gca, 'NextPlot', next_plot, 'Projection', 'Perspective', 'CameraPosition', c
 end
 
 
-function [data, color_func] = convert_data_ucs(rgb, src_space, ucs, dark_th)
+function [data, color_func] = convert_data_ucs(rgb, src_space, ucs, range)
 rgb = reshape(rgb, [], 3);
 if strcmpi(ucs, 'xyy')
     data = colorspace.rgb2xyz(rgb, src_space);
     data = max(data, 1e-6);
     data = [data(:, 1:2) ./ sum(data, 2), data(:, 2)];
-    data = data(data(:, 3) > dark_th, :);
     color_func = @xyy_color_func;
 elseif strcmpi(ucs, 'lab')
     [data, max_y] = colorspace.rgb2lab(rgb, src_space);
     data = data(:, [2, 3, 1]);
-    data = data(data(:, 3) > dark_th, :);
-    color_func = @(lab) abl_color_func(lab, max_y);
+    color_func = @(x) abl_color_func(x, max_y);
 else
     if ischar(ucs)
         error('Cannot recognize ucs: %s', ucs);
@@ -77,6 +77,8 @@ else
         error('Cannot recognize ucs: %s', ucs.short_name);
     end
 end
+lum_max = max(data(:, 3));
+data(:, 3) = max(min(data(:, 3), range(2) * lum_max), range(1) * lum_max);
 end
 
 
@@ -133,10 +135,11 @@ if max_lum > 1.001
     % HDR color / real scene color.
     xyz = colorspace.lab2xyz(lab);
     xyz = xyz * max_lum;
-    y2 = colorutil.signed_power(xyz(:, 2), 0.7);
+    y2 = min(xyz(:, 2) / prctile(xyz(:, 2), 99), 1.0);
+    y2 = colorutil.signed_power(y2, 0.7); % Just for visual comfort
     xyz = xyz .* (y2 ./ xyz(:, 2));
     lab = colorspace.xyz2lab(xyz);
-    lab(:, 1) = min(lab(:, 1) ./ prctile(lab(:, 1), 90), 1);
+    % lab(:, 1) = min(lab(:, 1) ./ prctile(lab(:, 1), 90), 1) * 100;
 end
 color = colorspace.lab2rgb(lab, 'sRGB');
 end

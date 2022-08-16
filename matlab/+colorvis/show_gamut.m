@@ -1,14 +1,14 @@
-function show_gamut(rgb_gamut, varargin)
+function show_gamut(color_volumn, varargin)
 % DESCRIPTION
 %   Show RGB gamut in a given space (such as Lab or ICtCp etc.).
 % SYNTAX
-%   show_gamut(rgb_gamut);              % Default in Lab space
-%   show_gamut(rgb_gamut, space);       % Plot in given space
+%   show_gamut(color_volumn);           % Default in Lab space
+%   show_gamut(color_volumn, ucs);      % Plot in given space
 %   show_gamut(..., Name, Value...);    % Set some parameters
 % INPUT
-%   rgb_gamut:          A string for RGB gamut name.
-%                       See colorutil.cs_name_validator for detail.
-%   space:              A string for the space in which gamut will be display.
+%   color_volumn:       A string or a struct returned from colorspace.get_param().
+%                       See colorutil.cs_param_validator for detail.
+%   ucs:                A string for a uniform color space in which input volumn will be display.
 % PARAMETER
 %   'Fill':             true | false. Default is false. Whether to fill the gamut or
 %                       just draw the boundaries.
@@ -16,74 +16,40 @@ function show_gamut(rgb_gamut, varargin)
 %                       the RGB gamut
 
 p = inputParser;
-p.addRequired('rgb_gamut', @colorutil.cs_name_validator);
-p.addOptional('space', 'Lab', @(x) ischar(x) && (strcmpi(x, 'Lab') || strcmpi(x, 'ICtCp')));
+p.addRequired('ColorVolumn', @colorutil.cs_param_validator);
+p.addOptional('UCS', 'Lab', @(x) ischar(x) && (strcmpi(x, 'Lab') || strcmpi(x, 'ICtCp')));
 p.addParameter('Fill', false, @(x) islogical(x) && isscalar(x));
 p.addParameter('Vertex', false, @(x) islogical(x) && isscalar(x));
-p.parse(rgb_gamut, varargin{:});
-
-end_points = [0, 0, 0, 0, 0, 1;
-    0, 0, 0, 0, 1, 0;
-    0, 0, 0, 1, 0, 0;
-    0, 0, 1, 0, 1, 0;
-    0, 0, 1, 1, 0, 0;
-    0, 1, 0, 0, 0, 1;
-    0, 1, 0, 1, 0, 0;
-    1, 0, 0, 0, 0, 1;
-    1, 0, 0, 0, 1, 0;
-    0, 1, 1, 1, 0, 0;
-    1, 0, 1, 0, 1, 0;
-    1, 1, 0, 0, 0, 1];
+p.parse(color_volumn, varargin{:});
 
 next_plot = get(gca, 'NextPlot');
 hold on;
 
 xy_lim = [-1, 1] * 0.5;
 z_lim = [0, 1];
-m = colorspace.xyz_rgb_mat(rgb_gamut);
-switch lower(p.Results.space)
+switch lower(p.Results.UCS)
     case 'lab'
-        tf = @(x) colorspace.rgb2lab(x, rgb_gamut);
-        inv_tf = @(x) colorspace.lab2xyz(x) * m;
+        tf = @(x) colorspace.rgb2lab(x, color_volumn);
     case 'ictcp'
         scale = 100;
-        tf = @(x) colorspace.rgb2ictcp(x, rgb_gamut, 'Scale', scale);
-        inv_tf = @(x) colorspace.ictcp2xyz(x) * m / scale;
-        ictcp = colorspace.rgb2ictcp([1, 1, 1], rgb_gamut, 'Scale', scale);
-        z_lim = [0, ictcp(1)];
+        tf = @(x) colorspace.rgb2ictcp(x, color_volumn, 'Scale', scale);
+        % ictcp = colorspace.rgb2ictcp([1, 1, 1], color_volumn, 'Scale', scale);
+        % z_lim = [0, ictcp(1)];
     otherwise
         warning('Space %s cannot be recognized! Use default Lab!');
-        tf = @(x) colorspace.rgb2lab(x, rgb_gamut);
-        inv_tf = @(x) colorspace.lab2xyz(x) * m;
+        tf = @(x) colorspace.rgb2lab(x, color_volumn);
 end
 
 % Plot vertices
 if p.Results.Vertex && ~p.Results.Fill
-    rgb = [end_points(:, 1:3) + end_points(:, 4:6); end_points(:, 4:6); 0, 0, 0];
-    rgb = unique(rgb, 'rows');
-    data = tf(rgb);
-    scatter3(data(:, 2), data(:, 3), data(:, 1), 60, rgb, 'MarkerFaceColor', 'flat');
+    plot_vertices(tf);
 end
 
-% Fill gamut
+% Fill gamut or just show edges
 if p.Results.Fill
-    dx = 0.005;
-    [xx, yy, zz] = meshgrid(xy_lim(1):dx:xy_lim(2), xy_lim(1):dx:xy_lim(2), z_lim(1):dx:z_lim(2));
-    data = [zz(:), xx(:), yy(:)];
-    rgb = inv_tf(data);
-    idx = min(rgb, [], 2) >= 0 & max(rgb, [], 2) <= 1 & ...
-        (min(rgb, [], 2) <= 0.05 | max(rgb, [], 2) >= 1 - 0.05);
-    data = data(idx, :);
-    rgb = rgb(idx, :);
-    rgb = colorspace.rgb_gamma(rgb, rgb_gamut);
-    scatter3(data(:, 2), data(:, 3), data(:, 1), 6, rgb, 'MarkerFaceColor', 'flat');
-end
-
-% Plot boundary
-for i = 1:size(end_points, 1)
-    rgb = (0:.01:1)' * end_points(i, 4:6) + end_points(i, 1:3);
-    data = tf(rgb);
-    plot3(data(:, 2), data(:, 3), data(:, 1), 'color', [1, 1, 1] * 0.25);
+    fill_gamut(tf);
+else
+    plot_edge(tf);
 end
 
 % Set axes properties.
@@ -99,4 +65,68 @@ set(gca, 'color', [1, 1, 1] * 0.75, ...
     'CameraPosition', cam_pos);
 
 set(gca, 'NextPlot', next_plot);
+end
+
+
+function plot_edge(tf)
+end_points = [0, 0, 0, 0, 0, 1;
+    0, 0, 0, 0, 1, 0;
+    0, 0, 0, 1, 0, 0;
+    0, 0, 1, 0, 1, 0;
+    0, 0, 1, 1, 0, 0;
+    0, 1, 0, 0, 0, 1;
+    0, 1, 0, 1, 0, 0;
+    1, 0, 0, 0, 0, 1;
+    1, 0, 0, 0, 1, 0;
+    0, 1, 1, 1, 0, 0;
+    1, 0, 1, 0, 1, 0;
+    1, 1, 0, 0, 0, 1];
+
+for i = 1:size(end_points, 1)
+    rgb = (0:.01:1)' * end_points(i, 4:6) + end_points(i, 1:3);
+    data = tf(rgb);
+    plot3(data(:, 2), data(:, 3), data(:, 1), 'color', [1, 1, 1] * 0.25);
+end
+end
+
+
+function plot_vertices(tf)
+rgb = [0, 0, 0;
+    0, 0, 1;
+    0, 1, 0;
+    0, 1, 1;
+    1, 0, 0;
+    1, 0, 1;
+    1, 1, 0;
+    1, 1, 1];
+data = tf(rgb);
+scatter3(data(:, 2), data(:, 3), data(:, 1), 60, rgb, 'MarkerFaceColor', 'flat');
+end
+
+
+function fill_gamut(tf)
+ds = 0.01;
+
+[xx, yy] = meshgrid(0:ds:1, 0:ds:1);
+zz = zeros(size(xx));
+rgb = cat(3, xx, yy, zz);
+data = tf(rgb);
+surface(data(:, :, 2), data(:, :, 3), data(:, :, 1), rgb, 'edgecolor', 'none');
+rgb = cat(3, xx, zz, yy);
+data = tf(rgb);
+surface(data(:, :, 2), data(:, :, 3), data(:, :, 1), rgb, 'edgecolor', 'none');
+rgb = cat(3, zz, xx, yy);
+data = tf(rgb);
+surface(data(:, :, 2), data(:, :, 3), data(:, :, 1), rgb, 'edgecolor', 'none');
+
+zz = ones(size(xx));
+rgb = cat(3, xx, yy, zz);
+data = tf(rgb);
+surface(data(:, :, 2), data(:, :, 3), data(:, :, 1), rgb, 'edgecolor', 'none');
+rgb = cat(3, xx, zz, yy);
+data = tf(rgb);
+surface(data(:, :, 2), data(:, :, 3), data(:, :, 1), rgb, 'edgecolor', 'none');
+rgb = cat(3, zz, xx, yy);
+data = tf(rgb);
+surface(data(:, :, 2), data(:, :, 3), data(:, :, 1), rgb, 'edgecolor', 'none');
 end
