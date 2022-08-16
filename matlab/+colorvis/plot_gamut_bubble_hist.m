@@ -15,8 +15,8 @@ function plot_gamut_bubble_hist(rgb, varargin)
 % OPTIONS
 %   'ZScale':           'Linear' | 'log'. Default is linear.
 %   'Background':       3-element RGB color. Default is [0.23, 0.23, 0.23].
-%   'DarkTh':           A scalar. Default is 0.0. Only luminance greater than max(lum)*th will be counted in.
-%   'WhiteTh':          A scalar. Default is 1.0. Only luminance less than max(lum)*th will be counted in.
+%   'DarkTh':           A scalar. Default is 0. Only luminance greater than prctile(Y, DarkTh) will be counted in.
+%   'WhiteTh':          A scalar. Default is 100. Only luminance less than prctile(Y, WhiteTh) will be counted in.
 %   'BubbleScale':      A scalar. Default is 1.0.
 %   'BubbleDensity':    A scalar. Default is 1.0.
 
@@ -26,8 +26,8 @@ p.addOptional('src_space', 'sRGB', @colorutil.cs_param_validator);
 p.addOptional('ucs', 'Lab', @(x) ischar(x) && (strcmpi(x, 'lab') || strcmpi(x, 'xyy')));
 p.addParameter('zscale', 'linear', @(x) strcmpi(x, 'linear') || strcmpi(x, 'log'));
 p.addParameter('background', [1, 1, 1]*0.23, @(x) isnumeric(x) && isvector(x) && length(x) == 3);
-p.addParameter('DarkTh', 0.0, @(x) isnumeric(x) && isscalar(x));
-p.addParameter('WhiteTh', 1.0, @(x) isnumeric(x) && isscalar(x));
+p.addParameter('DarkTh', 0, @(x) isnumeric(x) && isscalar(x));
+p.addParameter('WhiteTh', 100, @(x) isnumeric(x) && isscalar(x));
 p.addParameter('BubbleScale', 1.0, @(x) isnumeric(x) && isscalar(x));
 p.addParameter('BubbleDensity', 1.0, @(x) isnumeric(x) && isscalar(x));
 p.parse(rgb, varargin{:});
@@ -77,8 +77,8 @@ else
         error('Cannot recognize ucs: %s', ucs.short_name);
     end
 end
-lum_max = max(data(:, 3));
-data(:, 3) = max(min(data(:, 3), range(2) * lum_max), range(1) * lum_max);
+lim = prctile(data(:, 3), range);
+data(:, 3) = max(min(data(:, 3), lim(2)), lim(1));
 end
 
 

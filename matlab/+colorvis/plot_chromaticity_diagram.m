@@ -6,11 +6,10 @@ function plot_chromaticity_diagram(varargin)
 %   plot_chromaticity_diagram(Name, Value...)
 % OPTIONS
 %   'XYZData':          n*3 array, or m*n*3 image, xyz data used for 2d histogram.
-%   'DarkTh':           A scalar in [0, 1]. Y components less than this threshold will not count in
-%                       for histogram. Default is 0.07.
+%   'DarkTh':           A scalar in [0, 1]. Y components less than prctile(Y, DarkTh) will not count in
+%                       for histogram. Default is 1, which means Y must be brighter than darkest 1% pixels.
 %   'Fill':             true | false. Whether to fill the diagram with (approximate) RGB color.
 %                       If XYZData is set, this option will be ignore.
-%   'Color':            'real' | 3-elements RGB value. Default is 'real'.
 %   'Background':       3-elements RGB value. Default is [0.1, 0.1, 0.1].
 %   'LineWidth':        A scalar. Default is 1.2.
 %   'Pri':              A string for colorspace name, or a struct of colorspace parameter. See
@@ -21,10 +20,8 @@ function plot_chromaticity_diagram(varargin)
 
 p = inputParser;
 p.addParameter('XYZData', [], @colorutil.image_shape_validator);
-p.addParameter('DarkTh', 0.07, @isnumeric);
+p.addParameter('DarkTh', 1, @isnumeric);
 p.addParameter('Fill', false, @islogical);
-p.addParameter('Color', 'real', @(x) ischar(x) && strcmpi(x, 'real') || ...
-    isnumeric(x) && isvector(x) && length(x) == 3);
 p.addParameter('Background', [0.1, 0.1, 0.1], @(x) isnumeric(x) && isvector(x) && length(x) == 3);
 p.addParameter('LineWidth', 1.2, @isscalar);
 p.addParameter('Pri', [], @colorutil.cs_param_validator);
@@ -45,7 +42,7 @@ if isempty(p.Results.XYZData) && p.Results.Fill
 end
 
 if p.Results.LineWidth > 0 && ~p.Results.Fill
-    draw_boundary(p.Results.Lambda, p.Results.Color, p.Results.LineWidth);
+    draw_boundary(p.Results.Lambda, p.Results.LineWidth);
 end
 
 if ~isempty(p.Results.Pri)
@@ -101,7 +98,7 @@ plot(param.w(:, 1) / sum(param.w), param.w(:, 2) / sum(param.w), 'wo');
 end
 
 
-function draw_boundary(lambda, color, linewidth)
+function draw_boundary(lambda, linewidth)
 % DESCRIPTION
 %   It draws the boundary of chromaticity diagram
 
@@ -111,14 +108,10 @@ xy0 = xyz0(:, 1:2) ./ sum(xyz0, 2);
 xy_line = interp1([1; 0], [xy0(end, :); xy0(1, :)], linspace(1, 0, 20));
 xy = [xy0; xy_line];
 xyz = [xy, 1 - sum(xy, 2)];
-if ischar(color)
-    xyz = xyz ./ max(xyz(:, 2)) * 1.5;
-    rgb = colorspace.xyz2rgb(xyz);
-    for i = 2:size(xy, 1)
-        plot(xy(i-1:i, 1), xy(i-1:i, 2), 'color', rgb(i-1, :), 'linewidth', linewidth);
-    end
-else
-    plot(xy(:, 1), xy(:, 2), 'color', color, 'linewidth', linewidth);
+xyz = xyz ./ max(xyz(:, 2)) * 1.5;
+rgb = colorspace.xyz2rgb(xyz);
+for i = 2:size(xy, 1)
+    plot(xy(i-1:i, 1), xy(i-1:i, 2), 'color', rgb(i-1, :), 'linewidth', linewidth);
 end
 end
 
@@ -128,7 +121,7 @@ function plot_xy_hist(xyz, grid, background, dark_th)
 %   Plots 2D histogram of projected xyz data on chromaticity diagram.
 
 xyz = reshape(xyz, [], 3);
-valid_idx = xyz(:, 2) > dark_th;
+valid_idx = xyz(:, 2) > prctile(xyz(:, 2), dark_th);
 xyz = max(xyz(valid_idx, :), 1e-8);
 xy = xyz(:, 1:2) ./ sum(xyz, 2);
 
