@@ -54,9 +54,11 @@ if any(u_size ~= v_size) || any(~(u_size == y_size | u_size * 2 == y_size)) || .
     error('YUV size NOT match!');
 end
 
-if any(u_size ~= y_size)
+if any(u_size ~= y_size / 2)
     u = imresize(u, y_size / 2);
     v = imresize(v, y_size / 2);
+    u_size = size(u);
+    v_size = size(v);
 end
 
 uv_scale = 1.0;
