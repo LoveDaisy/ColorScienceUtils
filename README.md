@@ -72,6 +72,7 @@ And also you can plot 2D and 3D density map for color distribution. Say if we ha
 xyz = colorspace.rgb2xyz(rgb_image, 'sRGB');
 colorvis.plot_chromaticity_diagram('XYZData', xyz);
 ```
+This image is quite saturated, so you can find many 'hot spots' lie on triangle shaped boundary, which is exactly the boundary of sRGB gamut in xy plane.
 ![xy_hist](matlab/img/xy_hist.png)
 
 ```matlab
@@ -82,9 +83,11 @@ colorvis.plot_gamut_bubble_hist(rgb_image, 'sRGB');
 ![lab_bubble](matlab/img/Lab_bubble.png)
 
 ```matlab
-% Or display in xyY space, and use log scale for luminance axis.
-colorvis.plot_gamut_bubble_hist(rgb_image, 'sRGB', 'xyY', 'ZScale', 'log');
+% Or display in xyY space, and use log scale for luminance axis,
+% and cut off 15% dark pixels.
+colorvis.plot_gamut_bubble_hist(rgb_image, 'sRGB', 'xyY', 'ZScale', 'log', 'DarkTh', 15);
 ```
+You can see many bubbles are clipped and lay on bottom.
 ![xyy_bubble](matlab/img/xyY_bubble.png)
 
 ## TODO
