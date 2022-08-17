@@ -17,7 +17,8 @@ function show_gamut(color_volumn, varargin)
 
 p = inputParser;
 p.addRequired('ColorVolumn', @colorutil.cs_param_validator);
-p.addOptional('UCS', 'Lab', @(x) ischar(x) && (strcmpi(x, 'Lab') || strcmpi(x, 'ICtCp') || strcmpi(x, 'xyY')));
+p.addOptional('UCS', 'Lab', @(x) ischar(x) && (strcmpi(x, 'Lab') || strcmpi(x, 'ICtCp') || ...
+    strcmpi(x, 'xyY') || strcmpi(x, 'Luv')));
 p.addParameter('Fill', true, @(x) islogical(x) && isscalar(x));
 p.addParameter('Vertex', true, @(x) islogical(x) && isscalar(x));
 p.parse(color_volumn, varargin{:});
@@ -63,8 +64,9 @@ switch lower(ucs)
     case 'ictcp'
         tf = @(x) ictcp_transform(x, src_gamut);
     case 'xyy'
-        % tf = @(x) xyY_transform(x, src_gamut);
         tf = @(x) colorspace.rgb2xyY(x, src_gamut);
+    case 'luv'
+        tf = @(x) luv_transform(x, src_gamut);
     otherwise
         warning('Space %s cannot be recognized! Use default Lab!');
         tf = @(x) lab_transform(x, src_gamut);
@@ -172,4 +174,13 @@ ictcp = colorspace.rgb2ictcp(rgb, src_param, 'Scale', scale);
 ictcp = reshape(ictcp, [], 3);
 ctcpi = ictcp(:, [2, 3, 1]);
 ctcpi = reshape(ctcpi, input_size);
+end
+
+
+function uvl = luv_transform(rgb, src_param)
+input_size = size(rgb);
+luv = colorspace.rgb2luv(rgb, src_param);
+luv = reshape(luv, [], 3);
+uvl = luv(:, [2, 3, 1]);
+uvl = reshape(uvl, input_size);
 end
