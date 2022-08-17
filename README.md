@@ -28,7 +28,7 @@ And also I have implemented some conversions for HDR video. For example if you w
 ```matlab
 % Read YUV rawdata. Here it is yuv420p10le pixel format.
 % So component y, u, and v are all of uint16 class.
-[y, u, v] = colorutil.read_yuv_rawdata('yuv420p10le_rawdata.yuv');
+[y, u, v] = colorutil.read_yuv_rawdata('yuv420p10le_rawdata.yuv', [3840, 2160], 'yuv420p10le');
 
 % Convert to float type and normalize to [0, 1].
 [yfp, ufp, vfp] = colorutil.ycbcr_int2double(y, u, v, 10, 'tv');
