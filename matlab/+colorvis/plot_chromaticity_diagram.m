@@ -122,6 +122,7 @@ function plot_xy_hist(xyz, grid, background, dark_th)
 
 xyz = reshape(xyz, [], 3);
 valid_idx = xyz(:, 2) > prctile(xyz(:, 2), dark_th);
+xyz = xyz + randn(size(xyz)) * 1e-4;
 xyz = max(xyz(valid_idx, :), 1e-8);
 xy = xyz(:, 1:2) ./ sum(xyz, 2);
 
@@ -132,7 +133,7 @@ idx = sub2ind(hist_img_size, ...
     min(max(floor(xy(:, 2) / grid) + 1, 1), hist_img_size(1)), ...
     min(max(floor(xy(:, 1) / grid) + 1, 1), hist_img_size(2)));
 cnt = accumarray(idx, 1, [prod(hist_img_size), 1]);
-k = (cnt(:) / max(cnt(:)) * 1.2).^(0.8);
+k = (cnt(:) / max(cnt(:)) * 1.2);
 
 [xx, yy] = meshgrid(hist_img_x, hist_img_y);
 xy_grid = [xx(:), yy(:)];
