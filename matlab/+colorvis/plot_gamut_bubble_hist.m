@@ -23,7 +23,8 @@ function plot_gamut_bubble_hist(rgb, varargin)
 p = inputParser;
 p.addRequired('rgb', @colorutil.image_shape_validator);
 p.addOptional('src_space', 'sRGB', @colorutil.cs_param_validator);
-p.addOptional('ucs', 'Lab', @(x) ischar(x) && (strcmpi(x, 'lab') || strcmpi(x, 'xyy') || strcmpi(x, 'luv')));
+p.addOptional('ucs', 'Lab', @(x) ischar(x) && (strcmpi(x, 'lab') || strcmpi(x, 'xyy') || strcmpi(x, 'luv') || ...
+    strcmpi(x, 'cam02jab')));
 p.addParameter('zscale', 'linear', @(x) strcmpi(x, 'linear') || strcmpi(x, 'log'));
 p.addParameter('background', [1, 1, 1]*0.23, @(x) isnumeric(x) && isvector(x) && length(x) == 3);
 p.addParameter('DarkTh', 0, @(x) isnumeric(x) && isscalar(x));
@@ -74,6 +75,10 @@ elseif strcmpi(ucs, 'luv')
     data = colorspace.rgb2luv(rgb, src_space);
     data = data(:, [2, 3, 1]);
     color_func = @uvl_color_func;
+elseif strcmpi(ucs, 'cam02jab')
+    data = colorspace.rgb2cam02jab(rgb, src_space);
+    data = data(:, [2, 3, 1]);
+    color_func = @abj_color_func;
 else
     if ischar(ucs)
         error('Cannot recognize ucs: %s', ucs);
@@ -161,4 +166,9 @@ if max_lum > 1.001
     luv = colorspace.xyz2lab(xyz);
 end
 color = colorspace.luv2rgb(luv, 'sRGB');
+end
+
+
+function color = abj_color_func(abj)
+color = ones(size(abj)) * 0.7;
 end
