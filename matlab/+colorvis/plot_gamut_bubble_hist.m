@@ -115,7 +115,7 @@ bubble_size = min((cnt / s0 + 0.001), 1) * 70 * bubble_scale / bubble_density;
 
 if z_log
     bubble_center(:, 3) = exp(bubble_center(:, 3));
-    z_lim = [min(bubble_center(:, 3)) * 0.8, max(bubble_center(:, 3)) * 1.3];
+    z_lim = prctile(bubble_center(:, 3), [0, 100]) .* [0.8, 1.3];
 end
 ranges = [x_lim; y_lim; z_lim];
 end
