@@ -69,8 +69,7 @@ And also you can plot 2D and 3D density map for color distribution. Say if we ha
 
 ```matlab
 % Plot 2D density map
-xyz = colorspace.rgb2xyz(rgb_image, 'sRGB');
-colorvis.plot_chromaticity_diagram('XYZData', xyz);
+colorvis.plot_chromaticity_diagram('ColorData', rgb_image, 'ColorSpace', 'sRGB');
 ```
 This image is quite saturated, so you can find many 'hot spots' lie on triangle shaped boundary, which is exactly the boundary of sRGB gamut in xy plane.
 ![xy_hist](matlab/img/xy_hist.png)

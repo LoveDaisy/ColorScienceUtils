@@ -18,7 +18,8 @@ function plot_gamut_bubble_hist(rgb, varargin)
 %   'DarkTh':           A scalar. Default is 0. Only luminance greater than prctile(Y, DarkTh) will be counted in.
 %   'WhiteTh':          A scalar. Default is 100. Only luminance less than prctile(Y, WhiteTh) will be counted in.
 %   'BubbleScale':      A scalar. Default is 1.0.
-%   'BubbleDensity':    A scalar. Default is 1.0.
+%   'BubbleDensity':    A scalar, or 2-element vector. Default is 1.0.
+%   'BubbleDither':     A scalar, in [0, 1].
 
 p = inputParser;
 p.addRequired('rgb', @colorutil.image_shape_validator);
@@ -29,13 +30,15 @@ p.addParameter('background', [1, 1, 1]*0.23, @(x) isnumeric(x) && isvector(x) &&
 p.addParameter('DarkTh', 0, @(x) isnumeric(x) && isscalar(x));
 p.addParameter('WhiteTh', 100, @(x) isnumeric(x) && isscalar(x));
 p.addParameter('BubbleScale', 1.0, @(x) isnumeric(x) && isscalar(x));
-p.addParameter('BubbleDensity', 1.0, @(x) isnumeric(x) && isscalar(x));
+p.addParameter('BubbleDensity', 1.0, @(x) isnumeric(x) && (isscalar(x) || (isvector(x) && length(x) == 2)));
+p.addParameter('BubbleDither', 0.0, @(x) isnumeric(x) && isscalar(x) && x >= 0 && x <= 1);
 p.parse(rgb, varargin{:});
 
 zscale_log = strcmpi(p.Results.zscale, 'log');
 
 [data, color_func] = convert_data_ucs(rgb, p.Results.src_space, p.Results.ucs, [p.Results.DarkTh, p.Results.WhiteTh]);
-[bubble_center, bubble_size, ranges] = collect_bubble(data, p.Results.BubbleScale, p.Results.BubbleDensity, zscale_log);
+[bubble_center, bubble_size, ranges] = colorutil.hist3d(data, p.Results.BubbleScale, ...
+    p.Results.BubbleDensity, zscale_log, p.Results.BubbleDither);
 bubble_color = color_func(bubble_center);
 
 next_plot = get(gca, 'NextPlot');
@@ -83,41 +86,6 @@ else
 end
 lim = prctile(data(:, 3), range);
 data(:, 3) = max(min(data(:, 3), lim(2)), lim(1));
-end
-
-
-function [bubble_center, bubble_size, ranges] = collect_bubble(data, bubble_scale, bubble_density, z_log)
-if z_log
-    data(:, 3) = log(data(:, 3) + 1e-4);
-end
-
-x_lim = prctile(data(:, 1), [0, 100]);
-y_lim = prctile(data(:, 2), [0, 100]);
-z_lim = prctile(data(:, 3), [0, 100]);
-dxy = min(diff(x_lim), diff(y_lim)) / 20 / bubble_density;
-dz = diff(z_lim) / 40 / bubble_density;
-
-x_grid = x_lim(1):dxy:x_lim(2);
-y_grid = y_lim(1):dxy:y_lim(2);
-z_grid = z_lim(1):dz:z_lim(2);
-grid_size = [length(x_grid) - 1, length(y_grid) - 1, length(z_grid) - 1];
-
-sub = min(max(round((data - [x_lim(1), y_lim(1), z_lim(1)]) ./ [dxy, dxy, dz]) + 1, [1, 1, 1]), grid_size);
-ind = sub2ind(grid_size, sub(:, 1), sub(:, 2), sub(:, 3));
-cnt = accumarray(ind, 1, [prod(grid_size), 1]);
-cnt_idx = cnt > 0;
-[bx, by, bz] = ind2sub(grid_size, find(cnt_idx));
-bubble_center = ([bx, by, bz] - 0.5) .* [dxy, dxy, dz] + [x_lim(1), y_lim(1), z_lim(1)];
-cnt = cnt(cnt_idx);
-
-s0 = prctile(cnt, 99.5);
-bubble_size = min((cnt / s0 + 0.001), 1) * 70 * bubble_scale / bubble_density;
-
-if z_log
-    bubble_center(:, 3) = exp(bubble_center(:, 3));
-    z_lim = prctile(bubble_center(:, 3), [0, 100]) .* [0.8, 1.3];
-end
-ranges = [x_lim; y_lim; z_lim];
 end
 
 
