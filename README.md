@@ -1,6 +1,6 @@
 # Color Science Utilities
 
-A toolkit for color science. The first codes are in MATLAB, which is just my personal choice.
+A toolkit for color science. The first codes are in MATLAB, which is just my personal favor.
 I will try python later.
 
 ## Quick start
