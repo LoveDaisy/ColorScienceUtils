@@ -25,7 +25,7 @@ p = inputParser;
 p.addRequired('spec', @(x) validateattributes(x, {'numeric'}, {'2d', 'ncols', 2}));
 p.addParameter('ColorSpace', 'sRGB', @colorutil.cs_name_validator);
 p.addParameter('Mixed', true, @(x) validateattributes(x, {'logical'}, {'scalar'}));
-p.addParameter('Clamping', 'DeSat', @colorutil.rgb_compression_validator);
+p.addParameter('Clamping', 'Clip', @colorutil.rgb_compression_validator);
 p.addParameter('Y', 1, @(x) validateattributes(x, {'numeric'}, {'scalar'}));
 p.parse(spec, varargin{:});
 

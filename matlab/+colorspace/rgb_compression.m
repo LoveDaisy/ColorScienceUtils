@@ -40,26 +40,28 @@ switch lower(p.Results.method)
 end
 
 idx = sum(rgb < 0 | rgb > 1, 2) > 0;
-if ~p.Results.Linear
-    rgb(idx, :) = colorspace.rgb_ungamma(rgb(idx, :), param);
-end
-switch lower(p.Results.method)
-    case 'desat'
-        rgb(idx, :) = desat(rgb(idx, :));
-    case 'greying'
-        rgb(idx, :) = greying_xyz(rgb(idx, :), param);
-    case 'greyingxyz'
-        rgb(idx, :) = greying_xyz(rgb(idx, :), param);
-    case 'greyinglab'
-        rgb(idx, :) = greying_lab(rgb(idx, :), param);
-    case 'greyingictcp'
-        rgb(idx, :) = greying_ictcp(rgb(idx, :), param);
-    otherwise
-        warning('Cannot recognize method! Use clip as default!');
-        rgb(idx, :) = clip(rgb(idx, :));
-end
-if ~p.Results.Linear
-    rgb(idx, :) = colorspace.rgb_gamma(rgb(idx, :), param);
+if any(idx)
+    if ~p.Results.Linear
+        rgb(idx, :) = colorspace.rgb_ungamma(rgb(idx, :), param);
+    end
+    switch lower(p.Results.method)
+        case 'desat'
+            rgb(idx, :) = desat(rgb(idx, :));
+        case 'greying'
+            rgb(idx, :) = greying_xyz(rgb(idx, :), param);
+        case 'greyingxyz'
+            rgb(idx, :) = greying_xyz(rgb(idx, :), param);
+        case 'greyinglab'
+            rgb(idx, :) = greying_lab(rgb(idx, :), param);
+        case 'greyingictcp'
+            rgb(idx, :) = greying_ictcp(rgb(idx, :), param);
+        otherwise
+            warning('Cannot recognize method! Use clip as default!');
+            rgb(idx, :) = clip(rgb(idx, :));
+    end
+    if ~p.Results.Linear
+        rgb(idx, :) = colorspace.rgb_gamma(rgb(idx, :), param);
+    end
 end
 rgb = clip(rgb);
 end

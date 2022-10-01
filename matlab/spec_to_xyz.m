@@ -34,5 +34,7 @@ else
     xyz = bsxfun(@times, cmf, spec(:, 2));
 end
 
-xyz = xyz / max(xyz(:, 2)) * p.Results.Y;
+if p.Results.Y > 0
+    xyz = xyz / max(xyz(:, 2)) * p.Results.Y;
+end
 end
