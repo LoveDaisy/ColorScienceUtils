@@ -20,7 +20,7 @@ gamma = 1.2;
 y_coef = [0.2627, 0.6780, 0.0593];
 
 o = reshape(o, [], 3);
-ys = o * y_coef';
+ys = max(o * y_coef', 1e-8);
 ys = ys .^ (gamma - 1);
 
 o = o .* (alpha * ys);
