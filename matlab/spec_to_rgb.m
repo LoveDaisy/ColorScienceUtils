@@ -5,7 +5,7 @@ function rgb = spec_to_rgb(spec, varargin)
 %   rgb = spec_to_rgb(spec);
 %   rgb = spec_to_rgb(..., Name, Value...);
 % INPUT
-%   spec:               n*2 matrix. It records (wavelength, power density) pair.
+%   spec:               n*(m+1) matrix. It records (wavelength, intensity) pair.
 %                       Wavelength is in nm.
 % PARAMETER
 %   'ColorSpace':     	A string for colorspace. Default is 'sRGB'.
@@ -22,7 +22,7 @@ function rgb = spec_to_rgb(spec, varargin)
 %                       is of size 1*3, and if 'Mixed' is set to false, rgb is of size n*3.
 
 p = inputParser;
-p.addRequired('spec', @(x) validateattributes(x, {'numeric'}, {'2d', 'ncols', 2}));
+p.addRequired('spec', @(x) isnumeric(x) && (length(size(x)) == 2 && size(x, 2) >= 2));
 p.addParameter('ColorSpace', 'sRGB', @colorutil.cs_name_validator);
 p.addParameter('Mixed', true, @(x) validateattributes(x, {'logical'}, {'scalar'}));
 p.addParameter('Clamping', 'Clip', @colorutil.rgb_compression_validator);
