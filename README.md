@@ -89,6 +89,19 @@ colorvis.plot_gamut_bubble_hist(rgb_image, 'sRGB', 'xyY', 'ZScale', 'log', 'Dark
 You can see many bubbles are clipped and lay on bottom.
 ![xyy_bubble](matlab/img/xyY_bubble.png)
 
+### Spectrum rendering
+
+Here are some spectrum rendering functions, which can convert spectrum data into RGB colors.
+
+```matlab
+% Get blackbody radiance of 5700K, at wavelength from 420nm to 700nm
+lambda = 420:700;
+spc = colorvis.black_body_radiance(lambda, 5700);
+
+% Then render it to RGB color (should be like warm white)
+rgb = spec_to_rgb([lambda(:), spec(:)]);
+```
+
 ## TODO
 - [ ] Add more test cases
 - [ ] Add python codes
