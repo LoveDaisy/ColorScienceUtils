@@ -1,6 +1,8 @@
 # Color Science Utilities
 
-A toolkit for color science. The first codes are in MATLAB, which is just my personal favor.
+tags: [[tools]], [[programing]],
+
+A toolkit for [[color science]]. The first codes are in MATLAB, which is just my personal favor.
 I will try python later.
 
 ## Quick start
@@ -9,7 +11,7 @@ Just add subfolder `matlab` to your MATLAB path, and then you can use all the to
 
 ### Color space conversion
 
-I have implemented many conversions in `+colorspace` package. They are easy to use:
+I have implemented many conversions between [[color space]] in `+colorspace` package. They are easy to use:
 
 ```matlab
 % Read image. Assume it is an DisplayP3 image shot by a smart phone.
@@ -23,7 +25,7 @@ figure;
 imshow(img_new);
 ```
 
-And also I have implemented some conversions for HDR video. For example if you want to check YUV rawdata of an HDR video,
+And also I have implemented some conversions for [[HDR]] video. For example if you want to check YUV raw data of an HDR video,
 
 ```matlab
 % Read YUV rawdata. Here it is yuv420p10le pixel format.
