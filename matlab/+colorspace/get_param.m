@@ -27,6 +27,14 @@ if strcmpi(cs_name, 'sRGB')
 elseif strcmpi(cs_name, 'AdobeRGB') || strcmpi(cs_name, 'ARGB')
     name = 'argb';
     w_name = 'D65';
+elseif strcmpi(cs_name, '601') || strcmpi(cs_name, '601-625') || strcmpi(cs_name, '601_625') || ...
+  strcmpi(cs_name, 'bt470bg')  || strcmpi(cs_name, '470bg')
+    name = '601-625';
+    w_name = 'D65';
+elseif strcmpi(cs_name, '601-525') || strcmpi(cs_name, '601_525') || ...
+  strcmpi(cs_name, 'smpte170m')  || strcmpi(cs_name, '170m')
+    name = '601-525';
+    w_name = 'D65';
 elseif strcmpi(cs_name, '709')
     name = '709';
     w_name = 'D65';

@@ -35,7 +35,10 @@ elseif strcmpi(trc_name, 'p3dci') || strcmpi(trc_name, 'dci3')
     a = 0;
     b = 0;
     k = 0;
-elseif strcmpi(trc_name, '709')
+elseif strcmpi(trc_name, '709') || ...
+  strcmpi(trc_name, '601') || strcmpi(trc_name, '601-625') || strcmpi(trc_name, '601_625') || ...
+      strcmpi(trc_name, 'bt470bg') || strcmpi(trc_name, '470bg') || ...
+  strcmpi(trc_name, '601-525') || strcmpi(trc_name, '601_525') || strcmpi(trc_name, 'smpte170m') || strcmpi(trc_name, '170m')
     g = 1 / 0.45;
     a = 0.099;
     b = 0.018;
