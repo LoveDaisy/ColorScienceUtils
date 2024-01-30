@@ -49,9 +49,23 @@ COLORSPACE_CANONICAL_NAME_MAP = {a: n for n, v in COLORSPACE_NAMES.items() for a
 
 
 class WhitePoint(object):
-    """White point. Properties are:
-    name:   White point name, like D65, ...
-    xyz:    xyz coordinate, [x, y, z], and normalized so that y = 1
+    """White point.
+
+    This class represents a white point in color spaces. A white point is defined by its name and its XYZ coordinates,
+    which are normalized so that the Y coordinate is 1.
+
+    Properties:
+    - name: The name of the white point, such as D65, D60, DCI, E, etc.
+    - xyz: The XYZ coordinates of the white point, represented as [x, y, z].
+
+    Note: The XYZ coordinates are normalized so that the Y coordinate is 1.
+
+    Example:
+    ```python
+    wp = WhitePoint('D65')
+    print(wp.name)  # Output: D65
+    print(wp.xyz)   # Output: [0.3127, 0.3290, 0.3583]
+    ```
     """
 
     def __init__(self, wp: Union[str, 'WhitePoint'] = 'D65') -> None:
@@ -95,20 +109,16 @@ class TransferFunction(object):
     - trc: The forward transfer function.
     - inv_trc: The inverse transfer function.
 
-    Usage:
-    - Create a TransferFunction object with a specified transfer function name or another TransferFunction object.
-    - Call the object with a value or an array of values to apply the forward transfer function.
-    - Use the 'inverse' method to apply the inverse transfer function.
-
-    Example:
-    >>> tf = TransferFunction('sRGB')
-    >>> result = tf(0.5)  # Apply the forward transfer function to a single value
-    >>> inverse_result = tf.inverse(result)  # Apply the inverse transfer function
-
     Note:
     - The transfer functions supported are 'sRGB', 'AdobeRGB', 'BT.709', 'BT.2020', 'DisplayP3', 'DCIP3', and 'Linear'.
     - The 'Linear' transfer function does not apply any transformation.
 
+    Example:
+    ```python
+    tf = TransferFunction('sRGB')
+    result = tf(0.5)  # Apply the forward transfer function to a single value
+    inverse_result = tf.inverse(result)  # Apply the inverse transfer function
+    ```
     """
 
     @staticmethod
@@ -226,12 +236,24 @@ class TransferFunction(object):
 
 class RgbSpace(object):
     """
-    RGB colorspace. Properties include:
+    RGB colorspace.
 
+    Properties:
     - name: The name of the colorspace, such as sRGB, AdobeRGB, etc.
     - wp: The white point of the colorspace, represented by a WhitePoint object.
     - pri: The xyz coordinates of the primaries, with the constraint x + y + z = 1.
     - trc: The transfer characteristic function that converts linear signal to non-linear.
+
+    Note:
+    - The name of the colorspace must be one of the supported names: sRGB, AdobeRGB, BT.709, BT.2020, DisplayP3, DCIP3,
+      and their aliases: 709, bt709, bt.709, 2020, bt2020, p3, p3d65, etc. See COLORSPACE_NAMES for details.
+    - The xyz coordinates of the primaries must satisfy the constraint x + y + z = 1.
+
+    Example:
+    ```python
+    # Create an instance of the RGB colorspace
+    rgb_space = RgbSpace('sRGB')
+    ```
     """
 
     @staticmethod
@@ -312,11 +334,27 @@ class RgbSpace(object):
 
 
 class YCbCrSpace(object):
-    """YCbCr colorspace. Properties are
-    name:   Colorspace name, like BT.709, BT.2020, ...
-    pri:    Primaries. [x, y, z]
-    trc:    Transfer function.
-    coef:   Coefficients for conversion to RGB space. [y1, y2, y3, cb, cr]
+    """
+    YCbCr colorspace.
+
+    The YCbCr colorspace represents colors in terms of their luminance (Y) and chrominance (Cb and Cr) components.
+    It is commonly used in video and image compression.
+
+    Properties:
+    - name: The name of the colorspace, such as BT.709, BT.2020, etc.
+    - pri: The xyz coordinates of the primaries, represented by a list [x, y, z].
+    - trc: The transfer function that converts linear signal to non-linear.
+    - coef: The coefficients for conversion to RGB space, represented by a list [y1, y2, y3, cb, cr].
+
+    Note:
+    - The name of the colorspace must be one of the supported names: BT.709, BT.2020, DisplayP3, DCIP3,
+      and their aliases: 709, bt709, bt.709, 2020, bt2020, p3, p3d65, etc. See COLORSPACE_NAMES for details.
+
+    Example:
+    ```python
+    # Create an instance of the YCbCr colorspace
+    ycbcr_space = YCbCrSpace('BT.709')
+    ```
     """
 
     @staticmethod
