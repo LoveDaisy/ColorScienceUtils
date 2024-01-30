@@ -1,7 +1,7 @@
 import numpy as np
 from typing import Union, Optional
 
-import common
+from . import common
 
 """
 This module defines various colorspaces used in color science, including RGB, YCbCr, CMYK, Lab, XYZ, etc.
@@ -139,18 +139,18 @@ class TransferFunction(object):
     def __array_gamma(x: np.ndarray, g: float, a: float, b: float, k: float) -> np.ndarray:
         idx0 = x < b
         idx1 = np.logical_not(idx0)
-        y = x.copy()
+        y = np.zeros_like(x)
         y[idx0] = x[idx0] * k
-        y[idx1] = np.sign(x) * (np.abs(x) ** g * (1 + a) - a)
+        y[idx1] = np.sign(x[idx1]) * (np.abs(x[idx1]) ** (1 / g) * (1 + a) - a)
         return y
 
     @staticmethod
     def __array_inv_gamma(x: np.ndarray, g: float, a: float, b: float, k: float) -> np.ndarray:
         idx0 = x < b * k
         idx1 = np.logical_not(idx0)
-        y = x.copy()
+        y = np.zeros_like(x)
         y[idx0] = x[idx0] / k
-        y[idx1] = np.sign(x) * ((np.abs(x) + a) / (1 + a)) ** (1 / g)
+        y[idx1] = np.sign(x[idx1]) * ((np.abs(x[idx1]) + a) / (1 + a)) ** g
         return y
 
     @staticmethod
@@ -177,9 +177,9 @@ class TransferFunction(object):
             k = (1 + a) * b ** (g - 1)
 
         if isinstance(x, float):
-            return TransferFunction.__single_inv_gamma(x, a, b, g, k)
+            return TransferFunction.__single_inv_gamma(x, g, a, b, k)
         elif isinstance(x, np.ndarray):
-            return TransferFunction.__array_inv_gamma(x, a, b, g, k)
+            return TransferFunction.__array_inv_gamma(x, g, a, b, k)
         else:
             raise TypeError('Input should be float or np.ndarray!')
 
@@ -291,7 +291,7 @@ class RgbSpace(object):
         else:
             raise ValueError(f'Primary name {name} cannot recognize!')
 
-        return np.concatenate((pri, 1 - np.sum(pri, axis=1)), axis=1)
+        return np.c_[pri, (1 - np.sum(pri, axis=1))]
 
     def __init__(self, cs: Union[str, 'RgbSpace'] = 'sRGB', linear_trc: bool = False) -> None:
         # Copy construct

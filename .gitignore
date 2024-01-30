@@ -1,2 +1,5 @@
 # Compiled python
 **.pyc
+
+# VSCode settings
+.vscode/
