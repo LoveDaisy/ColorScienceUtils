@@ -115,83 +115,15 @@ class WhitePoint(object):
         return self.name == __o.name
 
 
-COLORSPACE_PARAM = {
-    'sRGB': {
-        'white_point': WhitePoint('D65'),
-        'trc_param': (0.055, 0.0031308, 2.4, 12.92),
-        'primaries': xy_to_xyz(
-            np.array([[0.6400, 0.3300],
-                      [0.3000, 0.6000],
-                      [0.1500, 0.0600]])),
-    },
-    'AdobeRGB': {
-        'white_point': WhitePoint('D65'),
-        'trc_param': (0.0, 0.0, 2.2, 0.0),
-        'primaries':  xy_to_xyz(
-            np.array([[0.6400, 0.3300],
-                      [0.2100, 0.7100],
-                      [0.1500, 0.0600]])),
-    },
-    'BT.601': {
-        'white_point': WhitePoint('D65'),
-        'trc_param': (0.099, 0.018, 1.0 / 0.45, 4.5),
-        'primaries':  xy_to_xyz(
-            np.array([[0.64, 0.33],
-                      [0.29, 0.60],
-                      [0.15, 0.06]])),
-        'y_coef': np.array([0.299, 0.587, 0.114]),
-        'cbcr_coef': np.array([1.772, 1.402]),
-    },
-    'BT.601-525': {
-        'white_point': WhitePoint('D65'),
-        'trc_param': (0.099, 0.018, 1.0 / 0.45, 4.5),
-        'primaries': xy_to_xyz(
-            np.array([[0.630, 0.340],
-                      [0.310, 0.595],
-                      [0.155, 0.070]])),
-        'y_coef': np.array([0.299, 0.587, 0.114]),
-        'cbcr_coef': np.array([1.772, 1.402]),
-    },
-    'BT.709': {
-        'white_point': WhitePoint('D65'),
-        'trc_param': (0.099, 0.018, 1.0 / 0.45, 4.5),
-        'primaries': xy_to_xyz(
-            np.array([[0.640, 0.330],
-                      [0.300, 0.600],
-                      [0.150, 0.060]])),
-        'y_coef': np.array([0.2126, 0.7152, 0.0722]),
-        'cbcr_coef': np.array([1.8556, 1.5748]),
-    },
-    'BT.2020NCL': {
-        'white_point': WhitePoint('D65'),
-        'trc_param': (0.099297, 0.018053, 1.0 / 0.45, 4.5),
-        'primaries': xy_to_xyz(
-            np.array([[0.708, 0.292],
-                      [0.170, 0.797],
-                      [0.131, 0.046]])),
-        'y_coef': np.array([0.2627, 0.6780, 0.0593]),
-        'cbcr_coef': np.array([1.8814, 1.4746]),
-    },
-    'DisplayP3': {
-        'white_point': WhitePoint('D65'),
-        'trc_param': (0.055, 0.0031308, 2.4, 12.92),
-        'primaries': xy_to_xyz(
-            np.array([[0.680, 0.320],
-                      [0.265, 0.690],
-                      [0.150, 0.060]])),
-        'y_coef': np.array([0.2627, 0.6780, 0.0593]),
-        'cbcr_coef': np.array([1.8814, 1.4746]),
-    },
-    'DCIP3': {
-        'white_point': WhitePoint('DCI'),
-        'trc_param': (0.0, 0.0, 2.6, 0.0),
-        'primaries': xy_to_xyz(
-            np.array([[0.680, 0.320],
-                      [0.265, 0.690],
-                      [0.150, 0.060]])),
-        'y_coef': np.array([0.2627, 0.6780, 0.0593]),
-        'cbcr_coef': np.array([1.8814, 1.4746]),
-    },
+TRC_PARAM = {
+    'sRGB': (0.055, 0.0031308, 2.4, 12.92),
+    'AdobeRGB': (0.0, 0.0, 2.2, 0.0),
+    'BT.601': (0.099, 0.018, 1.0 / 0.45, 4.5),
+    'BT.601-525': (0.099, 0.018, 1.0 / 0.45, 4.5),
+    'BT.709': (0.099, 0.018, 1.0 / 0.45, 4.5),
+    'BT.2020NCL': (0.099297, 0.018053, 1.0 / 0.45, 4.5),
+    'DisplayP3': (0.055, 0.0031308, 2.4, 12.92),
+    'DCIP3': (0.0, 0.0, 2.6, 0.0),
 }
 
 
@@ -297,17 +229,17 @@ class TransferFunction(object):
 
         # Construct from a string
         elif isinstance(trc, str):
-            if not trc.lower() in COLORSPACE_CANONICAL_NAME_MAP:
+            self.name = COLORSPACE_CANONICAL_NAME_MAP[trc.lower()]
+            if self.name not in TRC_PARAM:
                 raise ValueError(f'Transfer function name {trc} cannot recognize!')
 
-            self.name = COLORSPACE_CANONICAL_NAME_MAP[trc.lower()]
             # Do nothing for linear transfer funtion
             if self.name == 'Linear':
                 self.__trc = lambda x: x
                 self.__inv_trc = lambda x: x
                 return
             else:
-                a, b, g, k = COLORSPACE_PARAM[self.name]['trc_param']
+                a, b, g, k = TRC_PARAM[self.name]
 
             self.__trc = lambda x: TransferFunction.__gamma(x, g, a, b, k)
             self.__inv_trc = lambda x: TransferFunction.__inv_gamma(x, g, a, b, k)
@@ -328,6 +260,86 @@ class TransferFunction(object):
 
     def inverse(self, x: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
         return self.__inv_trc(x)
+
+
+COLORSPACE_PARAM = {
+    'sRGB': {
+        'white_point': WhitePoint('D65'),
+        'primaries': xy_to_xyz(
+            np.array([[0.6400, 0.3300],
+                      [0.3000, 0.6000],
+                      [0.1500, 0.0600]])),
+        'transfer_function': TransferFunction('sRGB'),
+    },
+    'AdobeRGB': {
+        'white_point': WhitePoint('D65'),
+        'primaries':  xy_to_xyz(
+            np.array([[0.6400, 0.3300],
+                      [0.2100, 0.7100],
+                      [0.1500, 0.0600]])),
+        'transfer_function': TransferFunction('AdobeRGB'),
+    },
+    'BT.601': {
+        'white_point': WhitePoint('D65'),
+        'primaries':  xy_to_xyz(
+            np.array([[0.64, 0.33],
+                      [0.29, 0.60],
+                      [0.15, 0.06]])),
+        'transfer_function': TransferFunction('BT.601'),
+        'y_coef': np.array([0.299, 0.587, 0.114]),
+        'cbcr_coef': np.array([1.772, 1.402]),
+    },
+    'BT.601-525': {
+        'white_point': WhitePoint('D65'),
+        'primaries': xy_to_xyz(
+            np.array([[0.630, 0.340],
+                      [0.310, 0.595],
+                      [0.155, 0.070]])),
+        'transfer_function': TransferFunction('BT.601-525'),
+        'y_coef': np.array([0.299, 0.587, 0.114]),
+        'cbcr_coef': np.array([1.772, 1.402]),
+    },
+    'BT.709': {
+        'white_point': WhitePoint('D65'),
+        'primaries': xy_to_xyz(
+            np.array([[0.640, 0.330],
+                      [0.300, 0.600],
+                      [0.150, 0.060]])),
+        'transfer_function': TransferFunction('BT.709'),
+        'y_coef': np.array([0.2126, 0.7152, 0.0722]),
+        'cbcr_coef': np.array([1.8556, 1.5748]),
+    },
+    'BT.2020NCL': {
+        'white_point': WhitePoint('D65'),
+        'primaries': xy_to_xyz(
+            np.array([[0.708, 0.292],
+                      [0.170, 0.797],
+                      [0.131, 0.046]])),
+        'transfer_function': TransferFunction('BT.2020NCL'),
+        'y_coef': np.array([0.2627, 0.6780, 0.0593]),
+        'cbcr_coef': np.array([1.8814, 1.4746]),
+    },
+    'DisplayP3': {
+        'white_point': WhitePoint('D65'),
+        'primaries': xy_to_xyz(
+            np.array([[0.680, 0.320],
+                      [0.265, 0.690],
+                      [0.150, 0.060]])),
+        'transfer_function': TransferFunction('DisplayP3'),
+        'y_coef': np.array([0.2627, 0.6780, 0.0593]),
+        'cbcr_coef': np.array([1.8814, 1.4746]),
+    },
+    'DCIP3': {
+        'white_point': WhitePoint('DCI'),
+        'primaries': xy_to_xyz(
+            np.array([[0.680, 0.320],
+                      [0.265, 0.690],
+                      [0.150, 0.060]])),
+        'transfer_function': TransferFunction('DCIP3'),
+        'y_coef': np.array([0.2627, 0.6780, 0.0593]),
+        'cbcr_coef': np.array([1.8814, 1.4746]),
+    },
+}
 
 
 class RgbSpace(object):
@@ -376,7 +388,7 @@ class RgbSpace(object):
             if linear_trc:
                 self.trc = TransferFunction('linear')
             else:
-                self.trc = TransferFunction(self.name)
+                self.trc = COLORSPACE_PARAM[self.name]['transfer_function']
             inv_pri = np.linalg.inv(self.pri)
             dw = self.wp.xyz @ inv_pri
             self.mat_rgb2xyz = np.diag(dw) @ self.pri
