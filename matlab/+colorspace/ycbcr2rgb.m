@@ -24,7 +24,7 @@ input_size = size(yuv);
 p = inputParser;
 p.addRequired('yuv', @colorutil.image_shape_validator);
 p.addOptional('yuv_param', '709', @colorutil.cs_param_validator);
-p.addOptional('rgb_param', 'sRGB', @colorutil.cs_param_validator);
+p.addOptional('rgb_param', [], @colorutil.cs_param_validator);
 p.parse(yuv, varargin{:});
 
 if ischar(p.Results.yuv_param)
@@ -47,7 +47,9 @@ coef_cr = yuv_param.yuv(5);
 m = [coef_y; ([0, 0, 1] - coef_y) / coef_cb; ([1, 0, 0] - coef_y) / coef_cr]';
 rgb = reshape(yuv, [], 3) / m;
 
-% Then convert to target RGB space
-rgb = colorspace.rgb2rgb(rgb, yuv_param, rgb_param);
+if ~isempty(rgb_param)
+    % Then convert to target RGB space
+    rgb = colorspace.rgb2rgb(rgb, yuv_param, rgb_param);
+end
 rgb = reshape(rgb, input_size);
 end

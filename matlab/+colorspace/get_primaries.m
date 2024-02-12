@@ -20,6 +20,16 @@ elseif strcmpi(name, '709')
     pri = [0.64, 0.33;
         0.3, 0.6;
         0.15, 0.06];
+elseif strcmpi(name, '601') || strcmpi(name, '601-625') || strcmpi(name, '601_625') || ...
+  strcmpi(name, 'bt470bg')  || strcmpi(name, '470bg')
+    pri = [0.64, 0.33;
+        0.29, 0.6;
+        0.15, 0.06];
+elseif strcmpi(name, '601-525') || strcmpi(name, '601_525') || ...
+  strcmpi(name, 'smpte170m')  || strcmpi(name, '170m')
+    pri = [0.63, 0.34;
+        0.31, 0.595;
+        0.155, 0.07];
 elseif strcmpi(name, '2020')
     pri = [0.708, 0.292;
         0.170, 0.797;

@@ -38,8 +38,9 @@ end
 if p.Results.Y > 0
     xyz = xyz ./ max(xyz(:, :, 2)) * p.Results.Y;
 end
-if p.Results.Mixed
-    xyz = squeeze(xyz);
+xyz = squeeze(xyz);
+if isvector(xyz)
+    xyz = reshape(xyz, 1, []);
 end
 end
 
