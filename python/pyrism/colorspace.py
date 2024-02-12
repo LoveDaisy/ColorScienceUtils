@@ -202,13 +202,15 @@ class TransferFunction(object):
                 self.__inv_trc = lambda x: x
                 return
 
-            elif self.name == 'sRGB':
+            elif self.name == 'sRGB' or self.name == 'DisplayP3':
                 a, b, g, k = 0.055, 0.0031308, 2.4, 12.92
+            elif self.name == 'DCIP3':
+                a, b, g, k = 0, 0, 2.6, 0
             elif self.name == 'AdobeRGB':
                 a, b, g, k = 0.0, 0.0, 2.2, 0.0
             elif self.name == 'BT.709':
                 a, b, g, k = 0.099, 0.018, 1.0 / 4.5, 4.5
-            elif self.name == 'BT.2020' or self.name == 'DisplayP3' or self.name == 'DCIP3':
+            elif self.name == 'BT.2020':
                 a, b, g, k = 0.099297, 0.018053, 1.0 / 4.5, 4.5
             else:
                 raise ValueError(f'Cannot recognize transfer function name {self.name}')
