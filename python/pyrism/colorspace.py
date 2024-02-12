@@ -225,7 +225,7 @@ class TransferFunction(object):
                 a, b, g, k = 0.0, 0.0, 2.2, 0.0
             elif self.name in ['BT.709', 'BT.601', 'BT.601-525', ]:
                 a, b, g, k = 0.099, 0.018, 1.0 / 0.45, 4.5
-            elif self.name == 'BT.2020':
+            elif self.name == 'BT.2020NCL':
                 a, b, g, k = 0.099297, 0.018053, 1.0 / 0.45, 4.5
             else:
                 raise ValueError(f'Cannot recognize transfer function name {self.name}')
@@ -276,12 +276,12 @@ class RgbSpace(object):
     @staticmethod
     def get_white_point(name: str) -> WhitePoint:
         if name in ['sRGB', 'AdobeRGB',
-                    'BT.601', 'BT.601-525', 'BT.709', 'BT.2020', 'DisplayP3', ]:
+                    'BT.601', 'BT.601-525', 'BT.709', 'BT.2020NCL', 'DisplayP3', ]:
             return WhitePoint('d65')
         elif name in ['DCIP3', ]:
             return WhitePoint('dci')
         else:
-            raise ValueError(f'Cannot recognize white point name {name}')
+            raise ValueError(f'Cannot recognize white point for {name}')
 
     @staticmethod
     def get_primaries(name: str) -> np.ndarray:
@@ -307,7 +307,7 @@ class RgbSpace(object):
             pri = np.array([[0.708, 0.292],
                             [0.170, 0.797],
                             [0.131, 0.046]])
-        elif name == 'BT.2020':
+        elif name == 'BT.2020NCL':
             pri = np.array([[0.708, 0.292],
                             [0.170, 0.797],
                             [0.131, 0.046]])
@@ -392,7 +392,7 @@ class YCbCrSpace(object):
         elif name in ['BT.601', 'BT.601-525', ]:
             y_coef = np.array([0.299, 0.587, 0.114])
             cbcr_coef = np.array([1.772, 1.402])
-        elif name in ['BT.2020', 'DisplayP3', 'DCIP3', ]:
+        elif name in ['BT.2020NCL', 'DisplayP3', 'DCIP3', ]:
             y_coef = np.array([0.2627, 0.6780, 0.0593])
             cbcr_coef = np.array([1.8814, 1.4746])
         else:
