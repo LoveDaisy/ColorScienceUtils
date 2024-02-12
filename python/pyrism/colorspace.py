@@ -259,7 +259,7 @@ class RgbSpace(object):
     """
 
     @staticmethod
-    def __get_wp(name: str) -> WhitePoint:
+    def get_white_point(name: str) -> WhitePoint:
         if name in ['sRGB', 'AdobeRGB',
                     'BT.709', 'BT.2020', 'DisplayP3', ]:
             return WhitePoint('d65')
@@ -269,7 +269,7 @@ class RgbSpace(object):
             raise ValueError(f'Cannot recognize white point name {name}')
 
     @staticmethod
-    def __get_pri(name: str) -> np.ndarray:
+    def get_primaries(name: str) -> np.ndarray:
         # rows for R, G, B
         # cols for x, y, z
         if name == 'sRGB':
@@ -316,8 +316,8 @@ class RgbSpace(object):
                 raise ValueError(f'Colorspace name {cs} cannot recognize!')
 
             self.name = COLORSPACE_CANONICAL_NAME_MAP[cs.lower()]
-            self.wp = RgbSpace.__get_wp(self.name)
-            self.pri = RgbSpace.__get_pri(self.name)
+            self.wp = RgbSpace.get_white_point(self.name)
+            self.pri = RgbSpace.get_primaries(self.name)
             if linear_trc:
                 self.trc = TransferFunction('linear')
             else:
@@ -387,7 +387,7 @@ class YCbCrSpace(object):
             if cs.lower() not in COLORSPACE_CANONICAL_NAME_MAP:
                 raise ValueError(f'YCbCr colorspace name {cs} cannot recognize!')
             self.name = COLORSPACE_CANONICAL_NAME_MAP[cs.lower()]
-            self.pri = RgbSpace.__get_pri(self.name)
+            self.pri = RgbSpace.get_primaries(self.name)
             self.trc = TransferFunction(self.name)
             self.coef = self.__get_coef(self.name)
 
@@ -400,7 +400,7 @@ class YCbCrSpace(object):
         return self.name == __o.name and self.trc == __o.trc
 
     def get_associated_rgb(self) -> RgbSpace:
-        pass
+        return RgbSpace(self.name)
 
 
 def rgb_to_xyz(x: np.ndarray, rgb: Union[str, RgbSpace] = 'sRGB') -> np.ndarray:
