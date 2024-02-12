@@ -27,6 +27,14 @@ COLORSPACE_NAMES = {
         'short': 'ARGB',
         'alias': ['argb', 'adobergb', ]
     },
+    'BT.601': {
+        'short': '470bg',
+        'alias': ['601', 'bt601', 'bt.601', '601-625', 'bt601-625', 'bt.601-625', 'bt470bt', '470bg', ]
+    },
+    'BT.601-525': {
+        'short': 'smpte170m',
+        'alias': ['601-525', 'bt601-525', 'bt.601-525', 'smpte170m', '170m', ]
+    },
     'BT.709': {
         'short': '709',
         'alias': ['709', 'bt709', 'bt.709', ]
@@ -202,13 +210,13 @@ class TransferFunction(object):
                 self.__inv_trc = lambda x: x
                 return
 
-            elif self.name == 'sRGB' or self.name == 'DisplayP3':
+            elif self.name in ['sRGB', 'DisplayP3', ]:
                 a, b, g, k = 0.055, 0.0031308, 2.4, 12.92
             elif self.name == 'DCIP3':
                 a, b, g, k = 0, 0, 2.6, 0
             elif self.name == 'AdobeRGB':
                 a, b, g, k = 0.0, 0.0, 2.2, 0.0
-            elif self.name == 'BT.709':
+            elif self.name in ['BT.709', 'BT.601', 'BT.601-525', ]:
                 a, b, g, k = 0.099, 0.018, 1.0 / 4.5, 4.5
             elif self.name == 'BT.2020':
                 a, b, g, k = 0.099297, 0.018053, 1.0 / 4.5, 4.5
@@ -261,7 +269,7 @@ class RgbSpace(object):
     @staticmethod
     def get_white_point(name: str) -> WhitePoint:
         if name in ['sRGB', 'AdobeRGB',
-                    'BT.709', 'BT.2020', 'DisplayP3', ]:
+                    'BT.601', 'BT.601-525', 'BT.709', 'BT.2020', 'DisplayP3', ]:
             return WhitePoint('d65')
         elif name in ['DCIP3', ]:
             return WhitePoint('dci')
@@ -280,6 +288,14 @@ class RgbSpace(object):
             pri = np.array([[0.6400, 0.3300],
                             [0.2100, 0.7100],
                             [0.1500, 0.0600]])
+        elif name == 'BT.601':
+            pri = np.array([[0.64, 0.33],
+                            [0.29, 0.60],
+                            [0.15, 0.06]])
+        elif name == 'BT.601-525':
+            pri = np.array([[0.630, 0.340],
+                            [0.310, 0.595],
+                            [0.155, 0.070]])
         elif name == 'BT.709':
             pri = np.array([[0.708, 0.292],
                             [0.170, 0.797],
@@ -366,7 +382,10 @@ class YCbCrSpace(object):
         if name == 'BT.709':
             y_coef = np.array([0.2126, 0.7152, 0.0722])
             cbcr_coef = np.array([1.8556, 1.5748])
-        elif name == 'BT.2020' or name == 'DisplayP3' or name == 'DCIP3':
+        elif name in ['BT.601', 'BT.601-525', ]:
+            y_coef = np.array([0.299, 0.587, 0.114])
+            cbcr_coef = np.array([1.772, 1.402])
+        elif name in ['BT.2020', 'DisplayP3', 'DCIP3', ]:
             y_coef = np.array([0.2627, 0.6780, 0.0593])
             cbcr_coef = np.array([1.8814, 1.4746])
         else:
