@@ -46,7 +46,7 @@ elseif strcmpi(cs_name, 'p3d65') || strcmpi(cs_name, 'd65p3') ||strcmpi(cs_name,
     w_name = 'D65';
 elseif strcmpi(cs_name, 'p3dci') || strcmpi(cs_name, 'dci3')
     name = 'p3dci';
-    w_name = 'D65';
+    w_name = 'dci';
 else
     warning('Input color space %d cannot recognize! Use default sRGB!', cs_name);
     name = 'srgb';
