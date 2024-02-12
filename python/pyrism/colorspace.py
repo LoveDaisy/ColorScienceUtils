@@ -13,47 +13,133 @@ Note: This module is part of the `pyrism` package for color science.
 """
 
 
-# Similar to ffmpeg's enum AVColorSpace. 'alias' are all in lower cases.
 COLORSPACE_NAMES = {
-    'Linear': {
-        'short': 'Linear',
-        'alias': ['linear', ]
-    },
     'sRGB': {
         'short': 'sRGB',
-        'alias': ['srgb', ]
+        'alias': ['srgb', ],
     },
     'AdobeRGB': {
         'short': 'ARGB',
-        'alias': ['argb', 'adobergb', ]
+        'alias': ['argb', 'adobergb', ],
     },
     'BT.601': {
         'short': '470bg',
-        'alias': ['601', 'bt601', 'bt.601', '601-625', 'bt601-625', 'bt.601-625', 'bt470bt', '470bg', ]
+        'alias': ['601', 'bt601', 'bt.601', '601-625', 'bt601-625', 'bt.601-625', 'bt470bt', '470bg', ],
     },
     'BT.601-525': {
         'short': 'smpte170m',
-        'alias': ['601-525', 'bt601-525', 'bt.601-525', 'smpte170m', '170m', ]
+        'alias': ['601-525', 'bt601-525', 'bt.601-525', 'smpte170m', '170m', ],
     },
     'BT.709': {
         'short': '709',
-        'alias': ['709', 'bt709', 'bt.709', ]
+        'alias': ['709', 'bt709', 'bt.709', ],
     },
     'BT.2020NCL': {
         'short': '2020NCL',
-        'alias': ['2020', 'bt2020', 'bt.2020', '2020ncl', 'bt2020ncl', 'bt.2020ncl', ]
+        'alias': ['2020', 'bt2020', 'bt.2020', '2020ncl', 'bt2020ncl', 'bt.2020ncl', ],
     },
     'DisplayP3': {
         'short': 'P3D65',
-        'alias': ['p3', 'p3d65', 'd65p3', 'displayp3', ]
+        'alias': ['p3', 'p3d65', 'd65p3', 'displayp3', ],
     },
     'DCIP3': {
         'short': 'P3DCI',
-        'alias': ['p3dci', 'dcip3', ]
+        'alias': ['p3dci', 'dcip3', ],
     },
 }
 
 COLORSPACE_CANONICAL_NAME_MAP = {a: n for n, v in COLORSPACE_NAMES.items() for a in v['alias']}
+
+
+def xy_to_xyz(xy: np.ndarray) -> np.ndarray:
+    return np.c_[xy, (1 - np.sum(xy, axis=1))]
+
+
+COLORSPACE_PARAM = {
+    'sRGB': {
+        'white_point': 'D65',
+        'trc_param': (0.055, 0.0031308, 2.4, 12.92),
+        'primaries': xy_to_xyz(
+            np.array([[0.6400, 0.3300],
+                      [0.3000, 0.6000],
+                      [0.1500, 0.0600]])),
+    },
+    'AdobeRGB': {
+        'white_point': 'D65',
+        'trc_param': (0.0, 0.0, 2.2, 0.0),
+        'primaries':  xy_to_xyz(
+            np.array([[0.6400, 0.3300],
+                      [0.2100, 0.7100],
+                      [0.1500, 0.0600]])),
+    },
+    'BT.601': {
+        'white_point': 'D65',
+        'trc_param': (0.099, 0.018, 1.0 / 0.45, 4.5),
+        'primaries':  xy_to_xyz(
+            np.array([[0.64, 0.33],
+                      [0.29, 0.60],
+                      [0.15, 0.06]])),
+        'y_coef': np.array([0.299, 0.587, 0.114]),
+        'cbcr_coef': np.array([1.772, 1.402]),
+    },
+    'BT.601-525': {
+        'white_point': 'D65',
+        'trc_param': (0.099, 0.018, 1.0 / 0.45, 4.5),
+        'primaries': xy_to_xyz(
+            np.array([[0.630, 0.340],
+                      [0.310, 0.595],
+                      [0.155, 0.070]])),
+        'y_coef': np.array([0.299, 0.587, 0.114]),
+        'cbcr_coef': np.array([1.772, 1.402]),
+    },
+    'BT.709': {
+        'white_point': 'D65',
+        'trc_param': (0.099, 0.018, 1.0 / 0.45, 4.5),
+        'primaries': xy_to_xyz(
+            np.array([[0.640, 0.330],
+                      [0.300, 0.600],
+                      [0.150, 0.060]])),
+        'y_coef': np.array([0.2126, 0.7152, 0.0722]),
+        'cbcr_coef': np.array([1.8556, 1.5748]),
+    },
+    'BT.2020NCL': {
+        'white_point': 'D65',
+        'trc_param': (0.099297, 0.018053, 1.0 / 0.45, 4.5),
+        'primaries': xy_to_xyz(
+            np.array([[0.708, 0.292],
+                      [0.170, 0.797],
+                      [0.131, 0.046]])),
+        'y_coef': np.array([0.2627, 0.6780, 0.0593]),
+        'cbcr_coef': np.array([1.8814, 1.4746]),
+    },
+    'DisplayP3': {
+        'white_point': 'D65',
+        'trc_param': (0.055, 0.0031308, 2.4, 12.92),
+        'primaries': xy_to_xyz(
+            np.array([[0.680, 0.320],
+                      [0.265, 0.690],
+                      [0.150, 0.060]])),
+        'y_coef': np.array([0.2627, 0.6780, 0.0593]),
+        'cbcr_coef': np.array([1.8814, 1.4746]),
+    },
+    'DCIP3': {
+        'white_point': 'DCI',
+        'trc_param': (0.0, 0.0, 2.6, 0.0),
+        'primaries': xy_to_xyz(
+            np.array([[0.680, 0.320],
+                      [0.265, 0.690],
+                      [0.150, 0.060]])),
+        'y_coef': np.array([0.2627, 0.6780, 0.0593]),
+        'cbcr_coef': np.array([1.8814, 1.4746]),
+    },
+}
+
+WHITE_POINTS = {
+    'D65': [0.3127, 0.3290],
+    'D60': [0.32168, 0.33767],
+    'DCI': [0.314, 0.351],
+    'E': [1/3, 1/3],
+}
 
 
 class WhitePoint(object):
@@ -85,14 +171,8 @@ class WhitePoint(object):
         # Construct from a string
         elif isinstance(wp, str):
             self.name = wp.upper()
-            if self.name == 'D65':
-                xy = [0.3127, 0.3290]
-            elif self.name == 'D60':
-                xy = [0.32168, 0.33767]
-            elif self.name == 'DCI':
-                xy = [0.314, 0.351]
-            elif self.name == 'E':
-                xy = [1/3, 1/3]
+            if self.name in WHITE_POINTS:
+                xy = WHITE_POINTS[self.name]
             else:
                 raise ValueError(f'white point name {wp} cannot recognize!')
             self.xyz = np.array([xy[0], xy[1], 1.0 - xy[0] - xy[1]]) / xy[1]
@@ -216,19 +296,8 @@ class TransferFunction(object):
                 self.__trc = lambda x: x
                 self.__inv_trc = lambda x: x
                 return
-
-            elif self.name in ['sRGB', 'DisplayP3', ]:
-                a, b, g, k = 0.055, 0.0031308, 2.4, 12.92
-            elif self.name == 'DCIP3':
-                a, b, g, k = 0, 0, 2.6, 0.0
-            elif self.name == 'AdobeRGB':
-                a, b, g, k = 0.0, 0.0, 2.2, 0.0
-            elif self.name in ['BT.709', 'BT.601', 'BT.601-525', ]:
-                a, b, g, k = 0.099, 0.018, 1.0 / 0.45, 4.5
-            elif self.name == 'BT.2020NCL':
-                a, b, g, k = 0.099297, 0.018053, 1.0 / 0.45, 4.5
             else:
-                raise ValueError(f'Cannot recognize transfer function name {self.name}')
+                a, b, g, k = COLORSPACE_PARAM[self.name]['trc_param']
 
             self.__trc = lambda x: TransferFunction.__gamma(x, g, a, b, k)
             self.__inv_trc = lambda x: TransferFunction.__inv_gamma(x, g, a, b, k)
@@ -273,53 +342,6 @@ class RgbSpace(object):
     ```
     """
 
-    @staticmethod
-    def get_white_point(name: str) -> WhitePoint:
-        if name in ['sRGB', 'AdobeRGB',
-                    'BT.601', 'BT.601-525', 'BT.709', 'BT.2020NCL', 'DisplayP3', ]:
-            return WhitePoint('d65')
-        elif name in ['DCIP3', ]:
-            return WhitePoint('dci')
-        else:
-            raise ValueError(f'Cannot recognize white point for {name}')
-
-    @staticmethod
-    def get_primaries(name: str) -> np.ndarray:
-        # rows for R, G, B
-        # cols for x, y, z
-        if name == 'sRGB':
-            pri = np.array([[0.6400, 0.3300],
-                            [0.3000, 0.6000],
-                            [0.1500, 0.0600]])
-        elif name == 'AdobeRGB':
-            pri = np.array([[0.6400, 0.3300],
-                            [0.2100, 0.7100],
-                            [0.1500, 0.0600]])
-        elif name == 'BT.601':
-            pri = np.array([[0.64, 0.33],
-                            [0.29, 0.60],
-                            [0.15, 0.06]])
-        elif name == 'BT.601-525':
-            pri = np.array([[0.630, 0.340],
-                            [0.310, 0.595],
-                            [0.155, 0.070]])
-        elif name == 'BT.709':
-            pri = np.array([[0.708, 0.292],
-                            [0.170, 0.797],
-                            [0.131, 0.046]])
-        elif name == 'BT.2020NCL':
-            pri = np.array([[0.708, 0.292],
-                            [0.170, 0.797],
-                            [0.131, 0.046]])
-        elif name == 'DisplayP3' or name == 'DCIP3':
-            pri = np.array([[0.680, 0.320],
-                            [0.265, 0.690],
-                            [0.150, 0.060]])
-        else:
-            raise ValueError(f'Primary name {name} cannot recognize!')
-
-        return np.c_[pri, (1 - np.sum(pri, axis=1))]
-
     def __init__(self, cs: Union[str, 'RgbSpace'] = 'sRGB', linear_trc: bool = False) -> None:
         # Copy construct
         if isinstance(cs, RgbSpace):
@@ -339,8 +361,8 @@ class RgbSpace(object):
                 raise ValueError(f'Colorspace name {cs} cannot recognize!')
 
             self.name = COLORSPACE_CANONICAL_NAME_MAP[cs.lower()]
-            self.wp = RgbSpace.get_white_point(self.name)
-            self.pri = RgbSpace.get_primaries(self.name)
+            self.wp = WhitePoint(COLORSPACE_PARAM[self.name]['white_point'])
+            self.pri = COLORSPACE_PARAM[self.name]['primaries']
             if linear_trc:
                 self.trc = TransferFunction('linear')
             else:
@@ -356,7 +378,6 @@ class RgbSpace(object):
     def __eq__(self, __o: object) -> bool:
         if not isinstance(__o, RgbSpace):
             return False
-
         return self.name == __o.name and self.trc == __o.trc
 
 
@@ -386,15 +407,9 @@ class YCbCrSpace(object):
 
     @staticmethod
     def __get_coef(name):
-        if name == 'BT.709':
-            y_coef = np.array([0.2126, 0.7152, 0.0722])
-            cbcr_coef = np.array([1.8556, 1.5748])
-        elif name in ['BT.601', 'BT.601-525', ]:
-            y_coef = np.array([0.299, 0.587, 0.114])
-            cbcr_coef = np.array([1.772, 1.402])
-        elif name in ['BT.2020NCL', 'DisplayP3', 'DCIP3', ]:
-            y_coef = np.array([0.2627, 0.6780, 0.0593])
-            cbcr_coef = np.array([1.8814, 1.4746])
+        if name in COLORSPACE_PARAM and 'y_coef' in COLORSPACE_PARAM[name] and 'cbcr_coef' in COLORSPACE_PARAM[name]:
+            y_coef = COLORSPACE_PARAM[name]['y_coef']
+            cbcr_coef = COLORSPACE_PARAM[name]['cbcr_coef']
         else:
             raise ValueError(f'YCbCr space name {name} cannot recognize!')
 
@@ -413,7 +428,7 @@ class YCbCrSpace(object):
             if cs.lower() not in COLORSPACE_CANONICAL_NAME_MAP:
                 raise ValueError(f'YCbCr colorspace name {cs} cannot recognize!')
             self.name = COLORSPACE_CANONICAL_NAME_MAP[cs.lower()]
-            self.pri = RgbSpace.get_primaries(self.name)
+            self.pri = COLORSPACE_PARAM[self.name]['primaries']
             self.trc = TransferFunction(self.name)
             self.coef = self.__get_coef(self.name)
 
