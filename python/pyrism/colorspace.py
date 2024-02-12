@@ -138,10 +138,10 @@ class TransferFunction(object):
 
     @staticmethod
     def __single_inv_gamma(x: float, g: float, a: float, b: float, k: float) -> float:
-        if abs(x) < b * k:
-            return x / k
+        if abs(x) < b:
+            return x * k
         else:
-            return x / abs(x) * ((abs(x) + a) / (1 + a)) ** (1 / g)
+            return x / abs(x) * ((abs(x) + a) / (1 + a)) ** g
 
     @staticmethod
     def __array_gamma(x: np.ndarray, g: float, a: float, b: float, k: float) -> np.ndarray:
@@ -149,40 +149,47 @@ class TransferFunction(object):
         idx1 = np.logical_not(idx0)
         y = np.zeros_like(x)
         y[idx0] = x[idx0] * k
-        y[idx1] = np.sign(x[idx1]) * (np.abs(x[idx1]) ** (1 / g) * (1 + a) - a)
+        y[idx1] = np.sign(x[idx1]) * (np.abs(x[idx1]) ** g * (1 + a) - a)
         return y
 
     @staticmethod
     def __array_inv_gamma(x: np.ndarray, g: float, a: float, b: float, k: float) -> np.ndarray:
-        idx0 = x < b * k
+        idx0 = x < b
         idx1 = np.logical_not(idx0)
         y = np.zeros_like(x)
-        y[idx0] = x[idx0] / k
+        y[idx0] = x[idx0] * k
         y[idx1] = np.sign(x[idx1]) * ((np.abs(x[idx1]) + a) / (1 + a)) ** g
         return y
 
     @staticmethod
     def __gamma(x: Union[float, np.ndarray], g: float, a: float,
                 b: Optional[float] = None, k: Optional[float] = None) -> Union[float, np.ndarray]:
-        if not b:
+        g = 1 / g
+        if b is None:
             b = ((1 + a) * (1 - g) / a) ** (-1 / g)
-        if not k:
+        if k is None:
             k = (1 + a) * b ** (g - 1)
 
         if isinstance(x, float):
-            return TransferFunction.__single_gamma(x, a, b, g, k)
+            return TransferFunction.__single_gamma(x, g, a, b, k)
         elif isinstance(x, np.ndarray):
-            return TransferFunction.__array_gamma(x, a, b, g, k)
+            return TransferFunction.__array_gamma(x, g, a, b, k)
         else:
             raise TypeError('Input should be float or np.ndarray!')
 
     @staticmethod
     def __inv_gamma(x: Union[float, np.ndarray], g: float, a: float,
                     b: Optional[float] = None, k: Optional[float] = None) -> Union[float, np.ndarray]:
-        if not b:
-            b = ((1 + a) * (1 - g) / a) ** (-1 / g)
-        if not k:
-            k = (1 + a) * b ** (g - 1)
+        if b is not None and k is not None:
+            b = b * k
+        else:
+            b = a / (g - 1)
+        if k is None:
+            k = (b * g / (1 + a)) ** g * (g - 1) / a
+        elif abs(k) < 1e-8:
+            k = float('inf')
+        else:
+            k = 1 / k
 
         if isinstance(x, float):
             return TransferFunction.__single_inv_gamma(x, g, a, b, k)
@@ -213,13 +220,13 @@ class TransferFunction(object):
             elif self.name in ['sRGB', 'DisplayP3', ]:
                 a, b, g, k = 0.055, 0.0031308, 2.4, 12.92
             elif self.name == 'DCIP3':
-                a, b, g, k = 0, 0, 2.6, 0
+                a, b, g, k = 0, 0, 2.6, 0.0
             elif self.name == 'AdobeRGB':
                 a, b, g, k = 0.0, 0.0, 2.2, 0.0
             elif self.name in ['BT.709', 'BT.601', 'BT.601-525', ]:
-                a, b, g, k = 0.099, 0.018, 1.0 / 4.5, 4.5
+                a, b, g, k = 0.099, 0.018, 1.0 / 0.45, 4.5
             elif self.name == 'BT.2020':
-                a, b, g, k = 0.099297, 0.018053, 1.0 / 4.5, 4.5
+                a, b, g, k = 0.099297, 0.018053, 1.0 / 0.45, 4.5
             else:
                 raise ValueError(f'Cannot recognize transfer function name {self.name}')
 
