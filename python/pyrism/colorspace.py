@@ -261,8 +261,10 @@ class RgbSpace(object):
     @staticmethod
     def __get_wp(name: str) -> WhitePoint:
         if name in ['sRGB', 'AdobeRGB',
-                    'BT.709', 'BT.2020', 'DisplayP3', 'DCIP3', ]:
+                    'BT.709', 'BT.2020', 'DisplayP3', ]:
             return WhitePoint('d65')
+        elif name in ['DCIP3', ]:
+            return WhitePoint('dci')
         else:
             raise ValueError(f'Cannot recognize white point name {name}')
 
