@@ -287,7 +287,7 @@ COLORSPACE_PARAM = {
                       [0.15, 0.06]])),
         'transfer_function': TransferFunction('BT.601'),
         'y_coef': np.array([0.299, 0.587, 0.114]),
-        'cbcr_coef': np.array([1.772, 1.402]),
+        'cbcr_coef': [1.772, 1.402],
     },
     'BT.601-525': {
         'white_point': WhitePoint('D65'),
@@ -297,7 +297,7 @@ COLORSPACE_PARAM = {
                       [0.155, 0.070]])),
         'transfer_function': TransferFunction('BT.601-525'),
         'y_coef': np.array([0.299, 0.587, 0.114]),
-        'cbcr_coef': np.array([1.772, 1.402]),
+        'cbcr_coef': [1.772, 1.402],
     },
     'BT.709': {
         'white_point': WhitePoint('D65'),
@@ -307,7 +307,7 @@ COLORSPACE_PARAM = {
                       [0.150, 0.060]])),
         'transfer_function': TransferFunction('BT.709'),
         'y_coef': np.array([0.2126, 0.7152, 0.0722]),
-        'cbcr_coef': np.array([1.8556, 1.5748]),
+        'cbcr_coef': [1.8556, 1.5748],
     },
     'BT.2020NCL': {
         'white_point': WhitePoint('D65'),
@@ -317,7 +317,7 @@ COLORSPACE_PARAM = {
                       [0.131, 0.046]])),
         'transfer_function': TransferFunction('BT.2020NCL'),
         'y_coef': np.array([0.2627, 0.6780, 0.0593]),
-        'cbcr_coef': np.array([1.8814, 1.4746]),
+        'cbcr_coef': [1.8814, 1.4746],
     },
     'DisplayP3': {
         'white_point': WhitePoint('D65'),
@@ -327,7 +327,7 @@ COLORSPACE_PARAM = {
                       [0.150, 0.060]])),
         'transfer_function': TransferFunction('DisplayP3'),
         'y_coef': np.array([0.2627, 0.6780, 0.0593]),
-        'cbcr_coef': np.array([1.8814, 1.4746]),
+        'cbcr_coef': [1.8814, 1.4746],
     },
     'DCIP3': {
         'white_point': WhitePoint('DCI'),
@@ -337,7 +337,7 @@ COLORSPACE_PARAM = {
                       [0.150, 0.060]])),
         'transfer_function': TransferFunction('DCIP3'),
         'y_coef': np.array([0.2627, 0.6780, 0.0593]),
-        'cbcr_coef': np.array([1.8814, 1.4746]),
+        'cbcr_coef': [1.8814, 1.4746],
     },
 }
 
@@ -427,16 +427,6 @@ class YCbCrSpace(object):
     ```
     """
 
-    @staticmethod
-    def __get_coef(name):
-        if name in COLORSPACE_PARAM and 'y_coef' in COLORSPACE_PARAM[name] and 'cbcr_coef' in COLORSPACE_PARAM[name]:
-            y_coef = COLORSPACE_PARAM[name]['y_coef']
-            cbcr_coef = COLORSPACE_PARAM[name]['cbcr_coef']
-        else:
-            raise ValueError(f'YCbCr space name {name} cannot recognize!')
-
-        return np.concatenate((y_coef, cbcr_coef))
-
     def __init__(self, cs: Union[str, 'YCbCrSpace'] = '709') -> None:
         # Copy construct
         if isinstance(cs, YCbCrSpace):
@@ -452,7 +442,12 @@ class YCbCrSpace(object):
             self.name = COLORSPACE_CANONICAL_NAME_MAP[cs.lower()]
             self.pri = COLORSPACE_PARAM[self.name]['primaries']
             self.trc = TransferFunction(self.name)
-            self.coef = self.__get_coef(self.name)
+
+            coef_y = COLORSPACE_PARAM[self.name]['y_coef']
+            coef_cbcr = COLORSPACE_PARAM[self.name]['cbcr_coef']
+            self.mat_rgb2ycbcr = np.vstack((coef_y,
+                                            (np.array([0, 0, 1.0]) - coef_y) / coef_cbcr[0],
+                                            (np.array([1.0, 0, 0]) - coef_y) / coef_cbcr[1])).transpose()
 
         else:
             raise TypeError('wrong type for argument cs!')
@@ -525,19 +520,11 @@ def rgb_to_ycbcr(x: np.ndarray, rgb: Union[str, RgbSpace] = 'sRGB', ycbcr: Union
     rgb = RgbSpace(rgb)
     ycbcr = YCbCrSpace(ycbcr)
 
-    coef_y = ycbcr.coef[0:3]
-    coef_cb = ycbcr.coef[3]
-    coef_cr = ycbcr.coef[4]
-
     # Convert to destination RGB space that is associated with the destination YCbCr space
     x = rgb_to_rgb(x, rgb, ycbcr.get_associated_rgb())
 
-    m = np.concatenate((coef_y,
-                        (np.array([0, 0, 1.0]) - coef_y) / coef_cb,
-                        (np.array([1.0, 0, 0]) - coef_y) / coef_cr), axis=1).transpose()
-
     old_shape = x.shape
-    x = x.reshape((-1, 3)) @ m
+    x = x.reshape((-1, 3)) @ ycbcr.mat_rgb2ycbcr
     x = x.reshape(old_shape)
 
     return x
