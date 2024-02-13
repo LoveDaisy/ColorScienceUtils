@@ -467,7 +467,8 @@ def rgb_to_xyz(x: np.ndarray, rgb: Union[str, RgbSpace] = 'sRGB') -> np.ndarray:
     if not common.check_color_chn(x, 3):
         raise common.DimensionNotMatchError('Input data should be 3-channel!')
 
-    rgb = RgbSpace(rgb)
+    if isinstance(rgb, str):
+        rgb = RgbSpace(rgb)
 
     # Convert to linear RGB
     if rgb.name != 'Linear':
@@ -489,7 +490,8 @@ def xyz_to_rgb(x: np.ndarray, rgb: Union[str, RgbSpace] = 'sRGB', clip_method: O
     if clip_method is not None and clip_method.lower() not in ['clip', 'none',]:
         raise ValueError('Invalid clip method!')
 
-    rgb = RgbSpace(rgb)
+    if isinstance(rgb, str):
+        rgb = RgbSpace(rgb)
 
     # Convert to linear RGB
     old_shape = x.shape
@@ -508,8 +510,14 @@ def xyz_to_rgb(x: np.ndarray, rgb: Union[str, RgbSpace] = 'sRGB', clip_method: O
 
 def rgb_to_rgb(x: np.ndarray, rgb_from: Union[str, RgbSpace] = 'sRGB', rgb_to: Union[str, RgbSpace] = 'sRGB',
                clip_method: Optional[str] = None) -> np.ndarray:
-    rgb_from = RgbSpace(rgb_from)
-    rgb_to = RgbSpace(rgb_to)
+    # Check input image
+    if not common.check_color_chn(x, 3):
+        raise common.DimensionNotMatchError('Input data should be 3-channel!')
+
+    if isinstance(rgb_from, str):
+        rgb_from = RgbSpace(rgb_from)
+    if isinstance(rgb_to, str):
+        rgb_to = RgbSpace(rgb_to)
 
     # Do nothing if the two colorspaces are the same
     if rgb_from == rgb_to:
@@ -526,11 +534,16 @@ def rgb_to_rgb(x: np.ndarray, rgb_from: Union[str, RgbSpace] = 'sRGB', rgb_to: U
 
 def rgb_to_ycbcr(x: np.ndarray, rgb: Union[str, RgbSpace] = 'sRGB', ycbcr: Union[str, YCbCrSpace] = '709',
                  clip_method: Optional[str] = None) -> np.ndarray:
-    rgb = RgbSpace(rgb)
-    ycbcr = YCbCrSpace(ycbcr)
+    # Check input image
+    if not common.check_color_chn(x, 3):
+        raise common.DimensionNotMatchError('Input data should be 3-channel!')
+
+    if isinstance(ycbcr, str):
+        ycbcr = YCbCrSpace(ycbcr)
+    rgb2 = ycbcr.get_associated_rgb()
 
     # Convert to destination RGB space that is associated with the destination YCbCr space
-    x = rgb_to_rgb(x, rgb_from=rgb, rgb_to=ycbcr.get_associated_rgb(), clip_method=clip_method)
+    x = rgb_to_rgb(x, rgb_from=rgb, rgb_to=rgb2, clip_method=clip_method)
 
     old_shape = x.shape
     x = x.reshape((-1, 3)) @ ycbcr.mat_rgb2ycbcr
