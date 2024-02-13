@@ -448,7 +448,8 @@ class YCbCrSpace(object):
             coef_cbcr = COLORSPACE_PARAM[self.name]['cbcr_coef']
             self.mat_rgb2ycbcr = np.vstack((coef_y,
                                             (np.array([0, 0, 1.0]) - coef_y) / coef_cbcr[0],
-                                            (np.array([1.0, 0, 0]) - coef_y) / coef_cbcr[1])).transpose()
+                                            (np.array([1.0, 0, 0]) - coef_y) / coef_cbcr[1])).T
+            self.mat_ycbcr2rgb = np.linalg.inv(self.mat_rgb2ycbcr)
 
         else:
             raise TypeError('wrong type for argument cs!')
@@ -532,7 +533,7 @@ def rgb_to_rgb(x: np.ndarray, rgb_from: Union[str, RgbSpace] = 'sRGB', rgb_to: U
     return x
 
 
-def rgb_to_ycbcr(x: np.ndarray, rgb: Union[str, RgbSpace] = 'sRGB', ycbcr: Union[str, YCbCrSpace] = '709',
+def rgb_to_ycbcr(x: np.ndarray, rgb: Union[str, RgbSpace] = 'sRGB', ycbcr: Union[str, YCbCrSpace] = 'BT.709',
                  clip_method: Optional[str] = None) -> np.ndarray:
     # Check input image
     if not common.check_color_chn(x, 3):
@@ -548,5 +549,25 @@ def rgb_to_ycbcr(x: np.ndarray, rgb: Union[str, RgbSpace] = 'sRGB', ycbcr: Union
     old_shape = x.shape
     x = x.reshape((-1, 3)) @ ycbcr.mat_rgb2ycbcr
     x = x.reshape(old_shape)
+
+    return x
+
+
+def ycbcr_to_rgb(x: np.ndarray, ycbcr: Union[str, YCbCrSpace] = 'BT.709', rgb: Union[str, RgbSpace] = 'sRGB',
+                 clip_method: Optional[str] = None) -> np.ndarray:
+    # Check input image
+    if not common.check_color_chn(x, 3):
+        raise common.DimensionNotMatchError('Input data should be 3-channel!')
+
+    if isinstance(ycbcr, str):
+        ycbcr = YCbCrSpace(ycbcr)
+    rgb2 = ycbcr.get_associated_rgb()
+
+    old_shape = x.shape
+    x = x.reshape((-1, 3)) @ ycbcr.mat_ycbcr2rgb
+    x = x.reshape(old_shape)
+
+    # Convert to RGB
+    x = rgb_to_rgb(x, rgb_from=rgb2, rgb_to=rgb, clip_method=clip_method)
 
     return x
