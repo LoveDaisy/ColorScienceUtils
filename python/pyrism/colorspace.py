@@ -370,9 +370,9 @@ class RgbSpace(object):
         if isinstance(cs, RgbSpace):
             self.name = cs.name
             self.wp = WhitePoint(cs.wp)
-            self.pri = cs.pri
-            self.mat_rgb2xyz = cs.mat_rgb2xyz
-            self.mat_xyz2rgb = cs.mat_xyz2rgb
+            self.pri = cs.pri.copy()
+            self.mat_rgb2xyz = cs.mat_rgb2xyz.copy()
+            self.mat_xyz2rgb = cs.mat_xyz2rgb.copy()
             if linear_trc:
                 self.trc = TransferFunction('linear')
             else:
@@ -432,9 +432,10 @@ class YCbCrSpace(object):
         # Copy construct
         if isinstance(cs, YCbCrSpace):
             self.name = cs.name
-            self.pri = cs.pri
+            self.pri = cs.pri.copy()
             self.trc = cs.trc
-            self.coef = cs.coef
+            self.mat_rgb2ycbcr = cs.mat_rgb2ycbcr.copy()
+            self.mat_ycbcr2rgb = cs.mat_ycbcr2rgb.copy()
 
         # Construct from string
         elif isinstance(cs, str):
@@ -522,7 +523,7 @@ def rgb_to_rgb(x: np.ndarray, rgb_from: Union[str, RgbSpace] = 'sRGB', rgb_to: U
 
     # Do nothing if the two colorspaces are the same
     if rgb_from == rgb_to:
-        return x.copy()
+        return x
 
     # Convert to XYZ
     x = rgb_to_xyz(x, rgb_from)
