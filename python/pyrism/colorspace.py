@@ -2,6 +2,7 @@ import numpy as np
 from typing import Union, Optional
 
 from . import common
+from . import gamutmatch
 
 """
 This module defines various colorspaces used in color science, including RGB, YCbCr, CMYK, Lab, XYZ, etc.
@@ -480,10 +481,13 @@ def rgb_to_xyz(x: np.ndarray, rgb: Union[str, RgbSpace] = 'sRGB') -> np.ndarray:
     return x
 
 
-def xyz_to_rgb(x: np.ndarray, rgb: Union[str, RgbSpace] = 'sRGB') -> np.ndarray:
+def xyz_to_rgb(x: np.ndarray, rgb: Union[str, RgbSpace] = 'sRGB', clip_method: Optional[str] = None) -> np.ndarray:
     # Check input image
     if not common.check_color_chn(x, 3):
         raise common.DimensionNotMatchError('Input data should be 3-channel!')
+    # Check clip method
+    if clip_method is not None and clip_method.lower() not in ['clip', 'none',]:
+        raise ValueError('Invalid clip method!')
 
     rgb = RgbSpace(rgb)
 
@@ -492,6 +496,9 @@ def xyz_to_rgb(x: np.ndarray, rgb: Union[str, RgbSpace] = 'sRGB') -> np.ndarray:
     x = x.reshape((-1, 3)) @ rgb.mat_xyz2rgb
     x = x.reshape(old_shape)
 
+    if clip_method is not None and clip_method.lower() == 'clip':
+        x = gamutmatch.clip(x)
+
     # Convert to non-linear RGB (gamma)
     if rgb.name != 'Linear':
         x = rgb.trc(x)
@@ -499,7 +506,8 @@ def xyz_to_rgb(x: np.ndarray, rgb: Union[str, RgbSpace] = 'sRGB') -> np.ndarray:
     return x
 
 
-def rgb_to_rgb(x: np.ndarray, rgb_from: Union[str, RgbSpace] = 'sRGB', rgb_to: Union[str, RgbSpace] = 'sRGB') -> np.ndarray:
+def rgb_to_rgb(x: np.ndarray, rgb_from: Union[str, RgbSpace] = 'sRGB', rgb_to: Union[str, RgbSpace] = 'sRGB',
+               clip_method: Optional[str] = None) -> np.ndarray:
     rgb_from = RgbSpace(rgb_from)
     rgb_to = RgbSpace(rgb_to)
 
@@ -511,17 +519,18 @@ def rgb_to_rgb(x: np.ndarray, rgb_from: Union[str, RgbSpace] = 'sRGB', rgb_to: U
     x = rgb_to_xyz(x, rgb_from)
 
     # Convert to RGB
-    x = xyz_to_rgb(x, rgb_to)
+    x = xyz_to_rgb(x, rgb_to, clip_method=clip_method)
 
     return x
 
 
-def rgb_to_ycbcr(x: np.ndarray, rgb: Union[str, RgbSpace] = 'sRGB', ycbcr: Union[str, YCbCrSpace] = '709') -> np.ndarray:
+def rgb_to_ycbcr(x: np.ndarray, rgb: Union[str, RgbSpace] = 'sRGB', ycbcr: Union[str, YCbCrSpace] = '709',
+                 clip_method: Optional[str] = None) -> np.ndarray:
     rgb = RgbSpace(rgb)
     ycbcr = YCbCrSpace(ycbcr)
 
     # Convert to destination RGB space that is associated with the destination YCbCr space
-    x = rgb_to_rgb(x, rgb, ycbcr.get_associated_rgb())
+    x = rgb_to_rgb(x, rgb_from=rgb, rgb_to=ycbcr.get_associated_rgb(), clip_method=clip_method)
 
     old_shape = x.shape
     x = x.reshape((-1, 3)) @ ycbcr.mat_rgb2ycbcr

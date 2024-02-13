@@ -1,10 +1,6 @@
 import numpy as np
 
 
-class DimensionNotMatchError(Exception):
-    pass
-
-
 def check_img_dim(x: np.ndarray, num_ch: int = -1) -> bool:
     """
     Check if the input image has the correct number of dimensions and channels.
